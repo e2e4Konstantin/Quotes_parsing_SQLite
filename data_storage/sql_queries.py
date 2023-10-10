@@ -4,7 +4,7 @@ sql_queries = {
     "table_name_raw_quotes": """tblRawQuotes""",
     "delete_table_raw_quote": """DROP TABLE IF EXISTS tblRawQuotes;""",
 
-    "select_tables_from_raw_catalog": """SELECT * FROM tblRawCatalog WHERE PRESSMARK REGEXP ?""",
+    "select_items_from_raw_catalog": """SELECT * FROM tblRawCatalog WHERE PRESSMARK REGEXP ?""",
     "select_quotes_from_raw": """SELECT * FROM tblRawQuotes""",
 
     # --- Tables
@@ -15,15 +15,17 @@ sql_queries = {
                         period                      INTEGER NOT NULL,
                         code	 					TEXT NOT NULL,
                         description					TEXT NOT NULL,
+                        raw_parent                  TEXT NOT NULL,
                         FK_tblTables_tblSubSections	INTEGER NOT NULL,
                         FOREIGN KEY (FK_tblTables_tblSubSections) REFERENCES tblSubSections(ID_tblSubSection),
                         UNIQUE (code)
                     );
                 """,
-    "create_index_tables": r"""CREATE UNIQUE INDEX IF NOT EXISTS idx_code_tblTable ON tblTables (code);""",
+    "create_index_tables": """CREATE UNIQUE INDEX IF NOT EXISTS idx_code_tblTable ON tblTables (code);""",
 
-    "insert_table_to_tblTables": r"""
-                INSERT INTO tblTables (period, code, description, FK_tblTables_tblSubSections) VALUES (?, ?, ?, ?);
+    "insert_table_to_tables": """
+                INSERT INTO tblTables (period, code, description, raw_parent, FK_tblTables_tblSubSections) 
+                VALUES (?, ?, ?, ?, ?);
                 """,
 
     "create_table_history_tables": """
@@ -70,6 +72,11 @@ sql_queries = {
         """,
     "create_index_quotes": """CREATE UNIQUE INDEX IF NOT EXISTS idx_code_tblQuotes ON tblQuotes (code);""",
 
+    "insert_quote": """
+                INSERT INTO tblQuotes (period, code, description, measure, related_quote, FK_tblQuotes_tblTables) 
+                VALUES (?, ?, ?, ?, ?, ?);
+                """, #  RETURNING ID_tblQuote
+
 
     "create_table_history_quotes": """
         CREATE TABLE IF NOT EXISTS _tblQuotesHistory (
@@ -100,6 +107,28 @@ sql_queries = {
                 new.measure, new.related_quote, new.FK_tblQuotes_tblTables, 1, 
                 cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer));
         END;
+        """,
+
+    "create_table_subsections": """
+            CREATE TABLE IF NOT EXISTS tblSubSections
+                (
+                    ID_tblSubSections				INTEGER PRIMARY KEY NOT NULL,
+                    period                 			INTEGER NOT NULL,
+                    code	 						TEXT NOT NULL,								
+                    description						TEXT NOT NULL,
+                    raw_parent                      TEXT NOT NULL,
+                    FK_tblSubSections_tblSections	INTEGER NOT NULL,	
+                    FOREIGN KEY (FK_tblSubSections_tblSections) REFERENCES tblSections(ID_tblSections),
+                    UNIQUE (code)
+                );
+        """,
+
+    "create_index_subsections": """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_id_sub_sections ON tblSubSections (ID_tblSubSections);
+        """,
+
+    "insert_subsection": r"""
+            INSERT INTO tblSubSections (period, code, description, raw_parent, FK_tblSubSections_tblSections) VALUES (?, ?, ?, ?, ?);
         """,
 
 }

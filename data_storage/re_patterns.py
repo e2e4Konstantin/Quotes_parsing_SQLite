@@ -11,7 +11,8 @@ item_patterns: dict[str:str] = {
 }
 
 title_prefix: dict[str:re.Pattern] = {
-    'table': re.compile(r"^\s*Таблица\s((\d+)\.(\d+)-(\d+)\.)*"),
+    'table':        re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),    # Таблица 3.1-4.
+    'subsection':   re.compile(r"^\s*Раздел\s*((\d+)\.)*"),                  # Раздел 7.
 }
 
 compiled_item_patterns = {

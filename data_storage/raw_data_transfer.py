@@ -4,8 +4,9 @@ import sys
 import traceback
 
 from data_storage.db_settings import dbControl
-from data_storage.sql_queries import sql_queries
-from data_storage.re_patterns import item_patterns, extract_code, remove_wildcard, title_extraction
+from data_storage.sql_creates import sql_creates
+from data_storage.sql_tools import sql_selects
+from data_storage.re_patterns import item_patterns, extract_code, remove_wildcard, title_extraction, code_split
 
 
 # Exception
@@ -24,7 +25,7 @@ from data_storage.re_patterns import item_patterns, extract_code, remove_wildcar
 def try_insert(labor_cursor: sqlite3.Cursor, query_name: str, src_data: tuple, message: str) -> int | None:
     """ Пытается выполнить запрос на вставку записи в БД"""
     try:
-        result = labor_cursor.execute(sql_queries[query_name], src_data)
+        result = labor_cursor.execute(sql_creates[query_name], src_data)
         if result:
             return result.lastrowid
     except sqlite3.Error as error:
@@ -35,7 +36,7 @@ def try_insert(labor_cursor: sqlite3.Cursor, query_name: str, src_data: tuple, m
 def transfer_raw_subsection(operating_db_filename: str, raw_db_filename: str, period: int):
     """ Записывает Разделы из сырой базы в рабочую """
     with dbControl(raw_db_filename) as raw_cursor, dbControl(operating_db_filename) as operating_cursor:
-        raw_cursor.execute(sql_queries["select_items_from_raw_catalog"], (item_patterns['subsection'],))
+        raw_cursor.execute(sql_creates["select_items_from_raw_catalog"], (item_patterns['subsection'],))
         raw_subsections = raw_cursor.fetchall()
         for raw_subsection in raw_subsections:
             description = title_extraction(raw_subsection[2], item_name='subsection')
@@ -49,7 +50,7 @@ def transfer_raw_subsection(operating_db_filename: str, raw_db_filename: str, pe
 def transfer_raw_tables(operating_db_filename: str, raw_db_filename: str, period: int):
     """ Записывает таблицы из сырой базы в рабочую """
     with dbControl(raw_db_filename) as raw_cursor, dbControl(operating_db_filename) as operating_cursor:
-        raw_cursor.execute(sql_queries["select_items_from_raw_catalog"], (item_patterns['table'],))
+        raw_cursor.execute(sql_creates["select_items_from_raw_catalog"], (item_patterns['table'],))
         raw_tables = raw_cursor.fetchall()
         for raw_table in raw_tables:
             description = title_extraction(raw_table[2], item_name='table')
@@ -79,7 +80,7 @@ def clean_quote(src_quote: tuple[str, str, str, str]) -> tuple[str, str, str, st
 def transfer_raw_quotes(operating_db_filename: str, raw_db_filename: str, period: int):
     """ Записывает расценки из сырой базы в рабочую """
     with dbControl(raw_db_filename) as raw_cursor, dbControl(operating_db_filename) as operating_cursor:
-        raw_cursor.execute(sql_queries["select_quotes_from_raw"])
+        raw_cursor.execute(sql_creates["select_quotes_from_raw"])
         quotes = raw_cursor.fetchall()
         for quote in quotes:
             table_code, quote_code, description, measure = clean_quote(quote)
@@ -95,3 +96,18 @@ def transfer_raw_quotes(operating_db_filename: str, raw_db_filename: str, period
                 inserted_id = try_insert(operating_cursor, "insert_quote", data, message)
                 # if inserted_id:
                 #     print(f"вставлена расценка: {quote_code} id: {inserted_id}")
+
+
+def add_null_subsections(db_filename: str, period: int):
+    """ Добавляем 0-подразделы """
+
+    with dbControl(db_filename) as cursor:
+        cursor.execute(sql_selects["select_subsections_code_for_period"], (period,))
+        # ID_tblSubSections, period, code, description, raw_parent, FK_tblSubSections_tblSections
+        # получить все коды
+        codes = set([
+            # code_split(code[0])
+            '-'.join(code[0].split('-')[:-1])
+            for code in cursor.fetchall()
+        ])
+        print(codes)

@@ -11,13 +11,15 @@ item_patterns: dict[str:str] = {
 }
 
 title_prefix: dict[str:re.Pattern] = {
-    'table':        re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),    # Таблица 3.1-4.
-    'subsection':   re.compile(r"^\s*Раздел\s*((\d+)\.)*"),                  # Раздел 7.
+    'table': re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),  # Таблица 3.1-4.
+    'subsection': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),  # Раздел 7.
 }
 
 compiled_item_patterns = {
     'table': re.compile(item_patterns['table']),
     'quote': re.compile(item_patterns['quote']),
+
+    'subsection_groups': re.compile(r"(^\d+\.\d+-\d+-)(\d+)\s*"),
 
     'wildcard': re.compile(r"[\t\n\r\f\v\s+]+"),
 
@@ -45,10 +47,14 @@ def title_extraction(title: str, item_name: str) -> str | None:
     return None
 
 
+# def get_quote_code(code: str = None) -> tuple | None:
+#     """ Выделяет из шифра расценки числа и возвращает кортеж.
+#         '4.1-2-10' -> (4, 1, 2, 10)"""
+#     if code:
+#         return re.match(item_patterns['quote'], code) is not None
+#     return None
 
-def get_quote_code(code: str = None) -> tuple | None:
-    """ Выделяет из шифра расценки числа и возвращает кортеж.
-        '4.1-2-10' -> (4, 1, 2, 10)"""
-    if code:
-        return re.match(item_patterns['quote'], code) is not None
-    return None
+def code_split(src_code: str) -> tuple:
+    """ Разбивает шифр на части.
+     '4.1-2-10' -> (4, 1, 2, 10)"""
+    return tuple(re.split('[.-]', src_code)) if src_code else tuple()

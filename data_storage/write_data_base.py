@@ -2,7 +2,7 @@ import sqlite3
 from pandas import DataFrame
 
 from data_storage.db_settings import dbControl
-from data_storage.sql_queries import sql_queries
+from data_storage.sql_creates import sql_creates
 
 
 def write_quotes_to_db(quotes_data: DataFrame, db_name: str):
@@ -13,8 +13,8 @@ def write_quotes_to_db(quotes_data: DataFrame, db_name: str):
     :return:
     """
     with dbControl(db_name) as cursor:
-        cursor.execute(sql_queries["delete_table_raw_quote"])
-        quotes_data.to_sql(name=sql_queries["table_name_raw_quotes"], con=cursor.connection, if_exists='append', index=False)
+        cursor.execute(sql_creates["delete_table_raw_quote"])
+        quotes_data.to_sql(name=sql_creates["table_name_raw_quotes"], con=cursor.connection, if_exists='append', index=False)
 
 
 def write_catalog_to_db(catalog_data: DataFrame, db_name: str):
@@ -25,8 +25,8 @@ def write_catalog_to_db(catalog_data: DataFrame, db_name: str):
     :return:
     """
     with dbControl(db_name) as cursor:
-        cursor.execute(sql_queries["delete_table_raw_catalog"])
-        catalog_data.to_sql(name=sql_queries["table_name_raw_catalog"], con=cursor.connection, if_exists='append', index=False)
+        cursor.execute(sql_creates["delete_table_raw_catalog"])
+        catalog_data.to_sql(name=sql_creates["table_name_raw_catalog"], con=cursor.connection, if_exists='append', index=False)
 
 
 

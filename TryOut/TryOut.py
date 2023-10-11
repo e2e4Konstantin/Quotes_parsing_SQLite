@@ -1,11 +1,17 @@
-import os
-import pandas as pd
+import sqlite3
 
-path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
-file_name = r"src\catalog_3_68.xlsx"
-file_name = os.path.join(path, file_name)
-sheet_name = "catalog"
+# As of some recent version of Python (I am using 3.9.4) it has become even easier to get a dictionary of results
+# from sqlite3. It is in the documentation for Python. Essentially just make the connection equal to a sqlite3.Row
+# and off you go.
 
+con1 = sqlite3.connect("programs_aux.sqlite")
+con1.row_factory = sqlite3.Row
+cur1 = con1.cursor()
+sql = 'select * from Main where watched is 0 order by Genre, Folder_runtime'
+cur1.execute(sql)
 
-df = pd.read_excel(io=file_name, sheet_name=sheet_name, usecols=list(range(3)), dtype=pd.StringDtype())
-df.info()
+rows = cur1.fetchall()
+for row in rows:
+    print(row['Title'])
+
+con1.close()

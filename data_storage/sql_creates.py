@@ -1,4 +1,4 @@
-sql_queries = {
+sql_creates = {
     "table_name_raw_catalog": """tblRawCatalog""",
     "delete_table_raw_catalog": """DROP TABLE IF EXISTS tblRawCatalog;""",
     "table_name_raw_quotes": """tblRawQuotes""",
@@ -108,28 +108,65 @@ sql_queries = {
                 cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer));
         END;
         """,
-
+    # --- > SubSections ------------------------------
     "create_table_subsections": """
-            CREATE TABLE IF NOT EXISTS tblSubSections
-                (
-                    ID_tblSubSections				INTEGER PRIMARY KEY NOT NULL,
-                    period                 			INTEGER NOT NULL,
-                    code	 						TEXT NOT NULL,								
-                    description						TEXT NOT NULL,
-                    raw_parent                      TEXT NOT NULL,
-                    FK_tblSubSections_tblSections	INTEGER NOT NULL,	
-                    FOREIGN KEY (FK_tblSubSections_tblSections) REFERENCES tblSections(ID_tblSections),
-                    UNIQUE (code)
-                );
+        CREATE TABLE IF NOT EXISTS tblSubSections
+            (
+                ID_tblSubSections				INTEGER PRIMARY KEY NOT NULL,
+                period                 			INTEGER NOT NULL,
+                code	 						TEXT NOT NULL,								
+                description						TEXT NOT NULL,
+                raw_parent                      TEXT NOT NULL,
+                FK_tblSubSections_tblSections	INTEGER NOT NULL,	
+                FOREIGN KEY (FK_tblSubSections_tblSections) REFERENCES tblSections(ID_tblSections),
+                UNIQUE (code)
+            );
         """,
 
     "create_index_subsections": """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_id_sub_sections ON tblSubSections (ID_tblSubSections);
         """,
 
+    # Вставка строки в таблицу подразделов. Обычная
     "insert_subsection": r"""
-            INSERT INTO tblSubSections (period, code, description, raw_parent, FK_tblSubSections_tblSections) VALUES (?, ?, ?, ?, ?);
+        INSERT INTO tblSubSections (period, code, description, raw_parent, FK_tblSubSections_tblSections) 
+        VALUES (?, ?, ?, ?, ?);
         """,
+    # таблица для хранения истории подразделов
+    "create_table_history_subsections": """
+        CREATE TABLE IF NOT EXISTS _tblSubSectionsHistory (
+                _rowid                          INTEGER, 
+                ID_tblSubSections				INTEGER PRIMARY KEY NOT NULL,
+                period                 			INTEGER NOT NULL,
+                code	 						TEXT NOT NULL,								
+                description						TEXT NOT NULL,
+                raw_parent                      TEXT NOT NULL,
+                FK_tblSubSections_tblSections	INTEGER NOT NULL,  
+                _version INTEGER,
+                _updated INTEGER
+        );
+        """,
+
+    "create_index_subsections_history": """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_rowid_subsections_history ON _tblSubSectionsHistory (_rowid);
+        """,
+
+    "create_trigger_history_subsections": """
+        CREATE TRIGGER IF NOT EXISTS tgr_insert_tblSubSectionsHistory
+        AFTER INSERT ON tblSubSections
+        BEGIN
+            INSERT INTO _tblSubSectionsHistory (
+                _rowid, ID_tblSubSections, period, code, description, raw_parent, 
+                FK_tblSubSections_tblSections, _version, _updated
+            )
+            VALUES (
+                new.rowid, new.ID_tblSubSections, new.period, new.code, new.description, new. raw_parent, 
+                new.FK_tblSubSections_tblSections, 1, cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer)
+                );
+        END;
+        """,
+
+
 
 }
 

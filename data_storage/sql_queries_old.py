@@ -70,6 +70,116 @@ sql_queries = {
                     );
                 """,
     "create_index_quote": """CREATE UNIQUE INDEX IF NOT EXISTS idx_code_tblQuotes ON tblQuotes (code);""",
+
+    # ------------------------------------
+
+# --- Tables
+    "create_table_tables": """
+                CREATE TABLE IF NOT EXISTS tblTables
+                    (
+                        ID_tblTable					INTEGER PRIMARY KEY NOT NULL,
+                        period                      INTEGER NOT NULL,
+                        code	 					TEXT NOT NULL,
+                        description					TEXT NOT NULL,
+                        raw_parent                  TEXT NOT NULL,
+                        FK_tblTables_tblSubSections	INTEGER NOT NULL,
+                        FOREIGN KEY (FK_tblTables_tblSubSections) REFERENCES tblSubSections(ID_tblSubSection),
+                        UNIQUE (code)
+                    );
+                """,
+    "create_index_tables": """CREATE UNIQUE INDEX IF NOT EXISTS idx_code_tblTable ON tblTables (code);""",
+
+    "insert_table_to_tables": """
+                INSERT INTO tblTables (period, code, description, raw_parent, FK_tblTables_tblSubSections) 
+                VALUES (?, ?, ?, ?, ?);
+                """,
+
+    "create_table_history_tables": """
+        CREATE TABLE IF NOT EXISTS _tblTablesHistory (
+                _rowid                      INTEGER, 
+                ID_tblTable                 INTEGER,    
+                period                      INTEGER NOT NULL,
+                code	 					TEXT NOT NULL,
+                description					TEXT NOT NULL,
+                FK_tblTables_tblSubSections	INTEGER NOT NULL,    
+                _version INTEGER,
+                _updated INTEGER
+        );
+        """,
+
+    "create_index_tables_history": """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_rowid_tables_history ON _tblTablesHistory (_rowid);
+        """,
+
+    "create_trigger_history_tables": """
+        CREATE TRIGGER IF NOT EXISTS tgr_insert_tblTablesHistory
+        AFTER INSERT ON tblTables
+        BEGIN
+            INSERT INTO _tblTablesHistory (_rowid, ID_tblTable, period, code, description, FK_tblTables_tblSubSections, _version, _updated)
+            VALUES (new.rowid, new.ID_tblTable, new.period, new.code, new.description, new.FK_tblTables_tblSubSections, 1, cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer));
+        END;
+        """,
+
+# --- > SubSections Разделы ------------------------------
+    "create_table_subsections": """
+        CREATE TABLE IF NOT EXISTS tblSubSections
+            (
+                ID_tblSubSection				INTEGER PRIMARY KEY NOT NULL,
+                period                 			INTEGER NOT NULL,
+                code	 						TEXT NOT NULL,								
+                description						TEXT NOT NULL,
+                raw_parent                      TEXT NOT NULL,
+                FK_tblSubSections_tblSection	INTEGER NOT NULL,	
+                FOREIGN KEY (FK_tblSubSections_tblSection) REFERENCES tblSections(ID_tblSection),
+                UNIQUE (code)
+            );
+        """,
+
+    "create_index_subsections": """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_id_sub_sections ON tblSubSections (ID_tblSubSection);
+        """,
+
+    # Вставка строки в таблицу подразделов. Обычная
+    "insert_subsection": r"""
+        INSERT INTO tblSubSections (period, code, description, raw_parent, FK_tblSubSections_tblSections) 
+        VALUES (?, ?, ?, ?, ?);
+        """,
+    # таблица для хранения истории подразделов
+    "create_table_history_subsections": """
+        CREATE TABLE IF NOT EXISTS _tblSubSectionsHistory (
+                _rowid                          INTEGER, 
+                ID_tblSubSection				INTEGER PRIMARY KEY NOT NULL,
+                period                 			INTEGER NOT NULL,
+                code	 						TEXT NOT NULL,								
+                description						TEXT NOT NULL,
+                raw_parent                      TEXT NOT NULL,
+                FK_tblSubSections_tblSection	INTEGER NOT NULL,  
+                _version INTEGER,
+                _updated INTEGER
+        );
+        """,
+
+    "create_index_subsections_history": """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_rowid_subsections_history ON _tblSubSectionsHistory (_rowid);
+        """,
+
+    "create_trigger_history_subsections": """
+        CREATE TRIGGER IF NOT EXISTS tgr_insert_tblSubSectionsHistory
+        AFTER INSERT ON tblSubSections
+        BEGIN
+            INSERT INTO _tblSubSectionsHistory (
+                _rowid, ID_tblSubSection, period, code, description, raw_parent, 
+                FK_tblSubSections_tblSection, _version, _updated
+            )
+            VALUES (
+                new.rowid, new.ID_tblSubSection, new.period, new.code, new.description, new. raw_parent, 
+                new.FK_tblSubSections_tblSection, 1, cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer)
+                );
+        END;
+        """,
+
+
+
 }
 
 

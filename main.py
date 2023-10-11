@@ -9,8 +9,8 @@ from pprint import pprint
 
 from data_extraction import read_data_frame, info_data_frame
 from data_storage import (write_catalog_to_db, write_quotes_to_db,
-                          dbControl, create_tables, transfer_raw_subsection,
-                          transfer_raw_tables, transfer_raw_quotes, add_null_subsections)
+                          dbControl, create_tables, transfer_raw_quotes,
+                          transfer_raw_catalog, fill_catalog_items)
 
 from data_storage import item_patterns, title_prefix, title_extraction
 
@@ -40,12 +40,16 @@ if __name__ == "__main__":
     period = 68
 
     # get_raw_data(path, raw_db)
-    # create_tables(operating_db)
+
+    create_tables(operating_db)
+    fill_catalog_items(operating_db)
+    transfer_raw_catalog(operating_db, raw_db, period)
+
     # transfer_raw_subsection(operating_db, raw_db, period)
     # transfer_raw_tables(operating_db, raw_db, period)
     # transfer_raw_quotes(operating_db, raw_db, period)
 
-    add_null_subsections(operating_db,  period)
+    # add_null_subsections(operating_db,  period)
 
     # d = dbControl(operating_db)
     # d.inform_db()

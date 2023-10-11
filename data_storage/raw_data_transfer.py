@@ -6,7 +6,7 @@ import traceback
 from data_storage.db_settings import dbControl
 from data_storage.sql_creates import sql_creates
 from data_storage.sql_tools import sql_selects
-from data_storage.re_patterns import item_patterns, extract_code, remove_wildcard, title_extraction, code_split
+from data_storage.re_patterns import item_patterns, extract_code, remove_wildcard, title_extraction, code_split, catalog_items
 
 
 # Exception
@@ -31,6 +31,7 @@ def try_insert(labor_cursor: sqlite3.Cursor, query_name: str, src_data: tuple, m
     except sqlite3.Error as error:
         print(f"SQLite error: {' '.join(error.args)},\t{message!r}")
     return None
+
 
 
 def transfer_raw_subsection(operating_db_filename: str, raw_db_filename: str, period: int):
@@ -104,10 +105,29 @@ def add_null_subsections(db_filename: str, period: int):
     with dbControl(db_filename) as cursor:
         cursor.execute(sql_selects["select_subsections_code_for_period"], (period,))
         # ID_tblSubSections, period, code, description, raw_parent, FK_tblSubSections_tblSections
-        # получить все коды
+        # получить все коды и убрать номер подраздела оставить только уникальные разделы
         codes = set([
-            # code_split(code[0])
             '-'.join(code[0].split('-')[:-1])
             for code in cursor.fetchall()
         ])
         print(codes)
+
+
+def fill_catalog_items(db_filename: str):
+    """ Заполняет справочник элементов каталога.
+    Первый элемент ссылается сам на себя. Старшинство определяется порядком в catalog_items.
+    """
+    with dbControl(db_filename) as cursor:
+        items = [(item, i) for i, item in enumerate(catalog_items)]
+        items[0] = (catalog_items[0], 1)
+        cursor.executemany(sql_creates["insert_catalog_item"], items)
+
+
+def transfer_raw_catalog(operating_db_filename: str, raw_db_filename: str, period: int):
+    """ Записывает Каталог из сырой базы в рабочую """
+    with dbControl(raw_db_filename) as raw_cursor, dbControl(operating_db_filename) as operating_cursor:
+        raw_cursor.execute(sql_creates["select_all_raw_catalog"])
+        raw_items = raw_cursor.fetchall()
+        for raw_item in raw_items[:6]:
+            item_type = identify_item_type(raw_item[1])
+            print(raw_item, item_type)

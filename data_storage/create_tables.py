@@ -34,6 +34,8 @@ def create_tables(db_filename: str):
         cursor.execute(sql_creates["create_table_history_catalog"])
         cursor.execute(sql_creates["create_index_catalog_history"])
         cursor.execute(sql_creates["create_trigger_history_catalog"])
+        cursor.execute(sql_creates["create_trigger_update_catalog"])
+
 
         # для хранения Расценок
         cursor.execute(sql_creates["create_table_quotes"])

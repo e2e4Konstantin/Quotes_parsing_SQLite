@@ -7,6 +7,8 @@ sql_creates = {
 
     "select_items_from_raw_catalog": """SELECT * FROM tblRawCatalog WHERE PRESSMARK REGEXP ?;""",
 
+    "select_raw_catalog_code_re": """SELECT * FROM tblRawCatalog WHERE PRESSMARK REGEXP ?;""",
+
     "select_all_raw_catalog": """SELECT * FROM tblRawCatalog;""",
 
     "select_quotes_from_raw": """SELECT * FROM tblRawQuotes""",
@@ -85,6 +87,7 @@ sql_creates = {
                 code	 				        TEXT NOT NULL,								
                 description				        TEXT NOT NULL,
                 raw_parent                      TEXT NOT NULL,
+                ID_parent                       INTEGER REFERENCES tblCatalogs (ID_tblCatalog), 
                 FK_tblCatalogs_tblCatalogItems  INTEGER NOT NULL,	
                 FOREIGN KEY (FK_tblCatalogs_tblCatalogItems) REFERENCES tblCatalogItems(ID_tblCatalogItem),
                 UNIQUE (code)
@@ -96,8 +99,8 @@ sql_creates = {
         """,
 
     "insert_catalog": """
-        INSERT INTO tblCatalogs (period, code, description, raw_parent, FK_tblCatalogs_tblCatalogItems) 
-        VALUES (?, ?, ?, ?, ?);
+        INSERT INTO tblCatalogs (period, code, description, raw_parent, ID_parent, FK_tblCatalogs_tblCatalogItems) 
+        VALUES (?, ?, ?, ?, ?, ?);
         """,
 
 
@@ -108,7 +111,8 @@ sql_creates = {
                 period                 	        INTEGER NOT NULL,
                 code	 				        TEXT NOT NULL,								
                 description				        TEXT NOT NULL,
-                raw_parent_code                 TEXT NOT NULL,
+                raw_parent                      TEXT NOT NULL,
+                ID_parent                       INTEGER NOT NULL,
                 FK_tblCatalogs_tblCatalogItems  INTEGER NOT NULL,	   
                 _version INTEGER,
                 _updated INTEGER
@@ -116,7 +120,7 @@ sql_creates = {
         """,
 
     "create_index_catalog_history": """
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_rowid_catalog_history ON _tblCatalogsHistory (_rowid);
+        CREATE INDEX IF NOT EXISTS idx_rowid_catalog_history ON _tblCatalogsHistory (_rowid);
         """,
 
     "create_trigger_history_catalog": """
@@ -124,15 +128,28 @@ sql_creates = {
         AFTER INSERT ON tblCatalogs
         BEGIN
             INSERT INTO _tblCatalogsHistory (
-                _rowid, ID_tblCatalog, period, code, description, raw_parent_code, FK_tblCatalogs_tblCatalogItems, 
+                _rowid, ID_tblCatalog, period, code, description, raw_parent, ID_parent, FK_tblCatalogs_tblCatalogItems, 
                 _version, _updated
                 )
             VALUES (
-                new.rowid, new.ID_tblCatalog, new.period, new.code, new.description, new.raw_parent_code,
+                new.rowid, new.ID_tblCatalog, new.period, new.code, new.description, new.raw_parent, new.ID_parent,
                 new.FK_tblCatalogs_tblCatalogItems, 1, cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer)
                 );
         END;
         """,
+    "create_trigger_update_catalog": """
+        CREATE TRIGGER IF NOT EXISTS create_trigger_update_tblCatalogs
+        AFTER UPDATE ON tblCatalogs
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO _tblCatalogsHistory (_rowid, ID_tblCatalog, period, code, description, raw_parent, ID_parent, FK_tblCatalogs_tblCatalogItems, _version, _updated)
+            SELECT old.rowid, new.ID_tblCatalog, new.period, new.code, new.description, new.raw_parent, new.ID_parent, new.FK_tblCatalogs_tblCatalogItems, 
+                (SELECT MAX(_version) FROM _tblCatalogsHistory WHERE _rowid = old.rowid) + 1, 
+                cast((julianday('now') - 2440587.5) * 86400 * 1000 AS INTEGER)
+            WHERE old.ID_tblCatalog != new.ID_tblCatalog or old.period != new.period or old.code != new.code or old.description != new.description or 
+            old.raw_parent != new.raw_parent or old.ID_parent != new.ID_parent or  old.FK_tblCatalogs_tblCatalogItems != new.FK_tblCatalogs_tblCatalogItems;
+        END;
+    """,
 
 
     # --- > Справочник типов элементов каталога ------------------------------
@@ -141,6 +158,7 @@ sql_creates = {
             (
                 ID_tblCatalogItem   INTEGER PRIMARY KEY NOT NULL,
                 name       			TEXT NOT NULL,
+                eng_name    		TEXT NOT NULL,
                 parent_item         INTEGER REFERENCES tblCatalogItems (ID_tblCatalogItem),
                 UNIQUE (name)
             );
@@ -150,7 +168,7 @@ sql_creates = {
         CREATE UNIQUE INDEX IF NOT EXISTS idx_name_catalog_items ON tblCatalogItems (name);
         """,
 
-    "insert_catalog_item": """INSERT INTO tblCatalogItems (name, parent_item) VALUES (?, ?); """,
+    "insert_catalog_item": """INSERT INTO tblCatalogItems (name, eng_name, parent_item) VALUES (?, ?, ?);""",
 
 }
 

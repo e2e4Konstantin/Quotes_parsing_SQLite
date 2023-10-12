@@ -1,6 +1,8 @@
 import sqlite3
 import re
 
+from file_features import output_message_exit
+
 
 def regex(expression, item):
     reg = re.compile(expression)
@@ -30,7 +32,7 @@ class dbControl:
         return f"db name: {self.__db_path}, connect: {self.__db_connection}, cursor: {self.cursor}"
 
     def __del__(self):
-        self.__db_connection.close()
+        self.__db_connection.close() if self.__db_connection is not None else self.__db_connection
 
     def connect_db(self):
         try:
@@ -39,17 +41,18 @@ class dbControl:
             self.__db_connection.row_factory = sqlite3.Row
             self.__db_connection.create_function("REGEXP", 2, regex)
         except sqlite3.Error as err:
-            if self.__db_connection:
-                self.__db_connection.rollback()
-            print(f"ошибка открытия БД Sqlite3: {err}")
+            self.close_db(err)
+            output_message_exit(f"ошибка открытия БД Sqlite3: {err}", f"{self.__db_path}")
+
 
     def close_db(self, exception_value=None):
-        self.cursor.close()
-        if isinstance(exception_value, Exception):
-            self.__db_connection.rollback()
-        else:
-            self.__db_connection.commit()
-        self.__db_connection.close()
+        if self.__db_connection is not None:
+            self.cursor.close() if self.cursor is not None else self.cursor
+            if isinstance(exception_value, Exception):
+                self.__db_connection.rollback()
+            else:
+                self.__db_connection.commit()
+            self.__db_connection.close()
 
     def run_execute(self, *args, **kwargs):
         try:
@@ -61,7 +64,6 @@ class dbControl:
             # exc_type, exc_value, exc_tb = sys.exc_info()
             # print(traceback.format_exception(exc_type, exc_value, exc_tb))
             # print(error)
-
 
     def inform_db(self, all_details: bool = False):
         """  Выводи в консоль информацию о таблицах БД

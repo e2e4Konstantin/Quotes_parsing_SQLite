@@ -10,7 +10,7 @@ from pprint import pprint
 from data_extraction import read_data_frame, info_data_frame
 from data_storage import (write_catalog_to_db, write_quotes_to_db,
                           dbControl, create_tables, transfer_raw_quotes,
-                          transfer_raw_catalog, fill_catalog_items, transfer_raw_chapter_to_catalog)
+                          fill_catalog_items, insert_upper_level_items, transfer_raw_items_to_catalog)
 
 from data_storage import items_data
 
@@ -29,8 +29,8 @@ def get_raw_data(db_path: str, db_name):
 
 
 if __name__ == "__main__":
-    # path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
-    path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
+    path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
+    # path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
 
     # читаем данные из исходных файлов во временную БД
     raw_db_name = r"output\RawCatalog.sqlite"
@@ -40,20 +40,20 @@ if __name__ == "__main__":
     period = 68
 
     # get_raw_data(path, raw_db)
+    # d = dbControl(raw_db)
+    # d.inform_db()
+    # d.close_db()
 
-    # create_tables(operating_db)
-    # fill_catalog_items(operating_db)
+    create_tables(operating_db)
+    fill_catalog_items(operating_db)                                            # создаем справочник объектов каталога
+    insert_upper_level_items('directory', operating_db, period)
+    transfer_raw_items_to_catalog('chapter', operating_db, raw_db, period)
+    transfer_raw_items_to_catalog('collection', operating_db, raw_db, period)
+    transfer_raw_items_to_catalog('section', operating_db, raw_db, period)
+    transfer_raw_items_to_catalog('subsection', operating_db, raw_db, period)
+    transfer_raw_items_to_catalog('table', operating_db, raw_db, period)
 
-    transfer_raw_chapter_to_catalog(operating_db, raw_db, period)
 
-
-    # transfer_raw_catalog(operating_db, raw_db, period)
-
-    # transfer_raw_subsection(operating_db, raw_db, period)
-    # transfer_raw_tables(operating_db, raw_db, period)
-    # transfer_raw_quotes(operating_db, raw_db, period)
-
-    # add_null_subsections(operating_db,  period)
 
     # d = dbControl(operating_db)
     # d.inform_db()

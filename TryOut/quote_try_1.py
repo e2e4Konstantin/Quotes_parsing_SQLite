@@ -1,8 +1,8 @@
 import sqlite3
 import os
 
-# path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
-path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
+path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
+# path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
 
 # читаем данные из исходных файлов во временную БД
 raw_db_name = r"output\RawCatalog.sqlite"
@@ -22,21 +22,44 @@ period = 68
 #     print(row)
 # con_raw.close()
 
+def get_id(cursor: sqlite3.Cursor, query: str, *args) -> int | None:
+    """ Выбрать id записи по запросу """
+    try:
+        result = cursor.execute(query, args)
+        if result:
+            row = cursor.fetchone()
+            return row[0] if row else None
+    except sqlite3.Error as error:
+        print(f"ошибка поиск в БД Sqlite3: {' '.join(error.args)}\n\t", f"получить id записи {args}")
+    return None
+
 
 con = sqlite3.connect(operating_db)
 # con.row_factory = sqlite3.Row
-cursor = con.cursor()
+cur = con.cursor()
 
 sql = """SELECT * FROM tblCatalogs WHERE period = ? and code = ?;""" # ID_tblCatalog
 par = (68, '0000')
 
-cursor.execute(sql, par)
-rows = cursor.fetchall()
+id = get_id(cur, sql, 68, '0000')
+# id = get_id(cur, sql)
+print(id)
+#
+#
+# rowCount = cursor.execute(sql, par)
+# print(rowCount)
+# print(cursor.__dir__())
+# print(cursor.lastrowid)
+# print(cursor.row_factory)
+# print(cursor.rowcount)
+# print(cursor.description)
+#
+# if rowCount :
+#     rows = cursor.fetchall()
+#     print(len(rows))
+#     for row in rows:
+#         print(row)
 
-print(rows[0])
-
-for row in rows:
-    print(row)
 con.close()
 
 

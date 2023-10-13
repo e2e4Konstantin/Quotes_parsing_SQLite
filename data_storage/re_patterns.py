@@ -5,6 +5,7 @@ _items_eng = ['chapter', 'collection', 'section', 'subsection', 'table', 'quote'
 _items_rus = ['глава', 'сборник', 'отдел', 'раздел', 'таблица', 'расценка']
 
 _item_patterns: dict[str:str] = {
+    'directory': r"^\s*0000\s*$",
     'chapter': r"^\s*(\d+)\s*$",
     'collection': r"^\s*((\d+)\.(\d+))\s*$",
     'section': r"^\s*((\d+)\.(\d+)-(\d+))\s*$",
@@ -14,22 +15,23 @@ _item_patterns: dict[str:str] = {
 }
 
 _compiled_item_patterns = {
-    'chapter': re.compile(_item_patterns['chapter']),
-    'collection': re.compile(_item_patterns['collection']),
-    'section': re.compile(_item_patterns['section']),
-    'subsection': re.compile(_item_patterns['subsection']),
-    'table': re.compile(_item_patterns['table']),
-    'quote': re.compile(_item_patterns['quote']),
+    'directory':    re.compile(_item_patterns['directory']),
+    'chapter':      re.compile(_item_patterns['chapter']),
+    'collection':   re.compile(_item_patterns['collection']),
+    'section':      re.compile(_item_patterns['section']),
+    'subsection':   re.compile(_item_patterns['subsection']),
+    'table':        re.compile(_item_patterns['table']),
+    'quote':        re.compile(_item_patterns['quote']),
 
     'subsection_groups': re.compile(r"(^\d+\.\d+-\d+-)(\d+)\s*"),
-    'wildcard': re.compile(r"[\t\n\r\f\v\s+]+"),
-    'code_valid_chars': re.compile(r"[^\d+.-]+"),
+    'wildcard':          re.compile(r"[\t\n\r\f\v\s+]+"),
+    'code_valid_chars':  re.compile(r"[^\d+.-]+"),
 
-    'table_prefix': re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),   # Таблица 3.1-4.
-    'subsection_prefix': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),            # Раздел 7.
-    'section_prefix': re.compile(r"^\s*Отдел\s*((\d+)\.)*"),                # Отдел 7.
-    'collection_prefix': re.compile(r"^\s*Сборник\s*((\d+)\.)*"),           # Сборник 7.
-    'chapter_prefix': re.compile(r"^\s*Глава\s*((\d+)\.)*"),                # Глава 7.
+    'table_prefix':         re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),   # Таблица 3.1-4.
+    'subsection_prefix':    re.compile(r"^\s*Раздел\s*((\d+)\.)*"),            # Раздел 7.
+    'section_prefix':       re.compile(r"^\s*Отдел\s*((\d+)\.)*"),                # Отдел 7.
+    'collection_prefix':    re.compile(r"^\s*Сборник\s*((\d+)\.)*"),           # Сборник 7.
+    'chapter_prefix':       re.compile(r"^\s*Глава\s*((\d+)\.)*"),                # Глава 7.
 }
 
 
@@ -43,7 +45,9 @@ class ItemCatalog:
 
 
 items_data: dict[str: ItemCatalog] = {
-    'directory': ItemCatalog(1, 'справочник', None, None, None),
+    'directory': ItemCatalog(
+        1, 'справочник', _item_patterns['directory'], _compiled_item_patterns['directory'], None
+    ),
     'chapter': ItemCatalog(
         2, 'глава', _item_patterns['chapter'], _compiled_item_patterns['chapter'],
         _compiled_item_patterns['chapter_prefix']

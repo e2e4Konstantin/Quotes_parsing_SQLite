@@ -24,7 +24,6 @@ from file_features import output_message
 #       |__NotSupportedError
 #
 
-
 def clean_quote(src_quote: tuple[str, str, str, str]) -> tuple[str, str, str, str]:
     """ Получает данные о расценке очищает/готовит их и возвращает обратно """
     table_code = extract_code(source=src_quote[0], item_name='table')
@@ -90,17 +89,15 @@ def insert_upper_level_items(item_name: str, db_filename: str, period: int) -> i
         up_data = (inserted_id, inserted_id)
         message = ' '.join(["UPDATE код родителя 'Справочник'", code, f"период: {period}"])
         inserted_id = db.try_insert(sql_update["update_catalog_id_parent"], up_data, message)
-        print(f"добавлена запись: {items_data[item_name].name.capitalize()!r} id: {inserted_id} ")
-        s = ""
-        s.capitalize()
+        print(f"добавлено запись: {items_data[item_name].name!r} id: {inserted_id} ")
         return inserted_id
 
 
-def get_parent_id_item_id(item_name: str, connect: dbControl, period: int, parent_code: str) -> tuple:
-    id_parent = connect.get_id(sql_selects["select_period_code_catalog"], period, parent_code)
+def get_parent_id_item_id(item_name: str, cursor: sqlite3.Cursor, period: int, parent_code: str) -> tuple:
+    id_parent = get_id(cursor, sql_selects["select_period_code_catalog"], period, parent_code)
     if id_parent is None:
         output_message(f"код родителя для {item_name!r} не найден:", f"шифр родителя: {parent_code!r}")
-    id_catalog_items = connect.get_id(sql_selects["select_name_catalog_items"], items_data[item_name].name)
+    id_catalog_items = get_id(cursor, sql_selects["select_name_catalog_items"], items_data[item_name].name)
     if id_catalog_items is None:
         output_message(f"id для {item_name!r} не найден:", f"название: {items_data[item_name].name!r}")
     return id_parent, id_catalog_items
@@ -108,9 +105,9 @@ def get_parent_id_item_id(item_name: str, connect: dbControl, period: int, paren
 
 def transfer_raw_items_to_catalog(item_name: str, operating_db_filename: str, raw_db_filename: str, period: int):
     """ Записывает item_name в каталог из сырой базы в рабочую и создает ссылки на родителя """
-    with dbControl(raw_db_filename) as raw_db, dbControl(operating_db_filename) as operating_db:
-        raw_db.cursor.execute(sql_creates["select_raw_catalog_code_re"], (items_data[item_name].pattern,))
-        raw_items = raw_db.cursor.fetchall()
+    with dbControl(raw_db_filename) as raw_cursor, dbControl(operating_db_filename) as operating_cursor:
+        raw_cursor.execute(sql_creates["select_raw_catalog_code_re"], (items_data[item_name].pattern,))
+        raw_items = raw_cursor.fetchall()
         if raw_items:
             success = []
             for item in raw_items:
@@ -119,14 +116,14 @@ def transfer_raw_items_to_catalog(item_name: str, operating_db_filename: str, ra
                 if len(check_types) > 0 and check_types[0] == item_name:
                     raw_parent = clear_code(item[0])
 
-                    id_parent, id_items = get_parent_id_item_id(item_name, operating_db, period, raw_parent)
+                    id_parent, id_items = get_parent_id_item_id(item_name, operating_cursor, period, raw_parent)
                     if id_parent and id_items:
                         # period, code, description, raw_parent, ID_parent, FK_tblCatalogs_tblCatalogItems
                         data = (
                             period, code, title_extraction(item[2], check_types[0]), raw_parent, id_parent, id_items
                         )
                         message = ' '.join([f"INSERT {item_name} {code!r} в каталог", code, f"период: {period}"])
-                        inserted_id = operating_db.try_insert(sql_creates["insert_catalog"], data, message)
+                        inserted_id = try_execute(operating_cursor, sql_creates["insert_catalog"], data, message)
                         if inserted_id:
                             success.append(inserted_id)
                             # print(inserted_id, data, item)
@@ -134,7 +131,7 @@ def transfer_raw_items_to_catalog(item_name: str, operating_db_filename: str, ra
                         output_message(f"запись {item}", f"не добавлена в БД")
                 else:
                     output_message(f"не распознан шифр записи {code}:", f"{items_data[item_name].pattern}")
-            print(f"добавлено {len(success)} записей {items_data[item_name].name.capitalize()!r}")
+            print(f"добавлено {len(success)} записей {items_data[item_name].name!r}")
         else:
             output_message(f"в сырой БД Sqlite3 не найдено ни одной записи типа: {items_data[item_name].name!r}",
                            f"{items_data[item_name].pattern}")

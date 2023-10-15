@@ -1,5 +1,6 @@
 import sqlite3
 import re
+import os
 
 from file_features import output_message_exit, output_message
 
@@ -54,23 +55,13 @@ class dbControl:
         try:
             result = self.cursor.execute(query, args)
             if result:
+                print(result.lastrowid)
                 row = self.cursor.fetchone()
                 return row[0] if row else None
         except sqlite3.Error as error:
             output_message(f"ошибка. поиск в БД Sqlite3: {' '.join(error.args)}",
                            f"получить id записи {args}")
         return None
-
-    def try_insert(self, query: str, src_data: tuple, message: str) -> int | None:
-        """ Пытается выполнить запрос на вставку записи в БД. Возвращает rowid """
-        try:
-            result = self.cursor.execute(query, src_data)
-            if result:
-                return result.lastrowid
-        except sqlite3.Error as error:
-            output_message(f"ошибка INSERT запроса БД Sqlite3: {' '.join(error.args)}", f"{message}")
-        return None
-
 
     def run_execute(self, *args, **kwargs):
         try:
@@ -108,3 +99,23 @@ class dbControl:
                         print(f"данные таблицы:")
                         self.cursor.execute(f"SELECT * from {table_name}")
                         print([row_i for row_i in self.cursor])
+
+
+if __name__ == "__main__":
+    path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
+    # path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
+
+    # читаем данные из исходных файлов во временную БД
+    raw_db_name = r"output\RawCatalog.sqlite"
+    raw_db = os.path.join(path, raw_db_name)
+
+
+    db = dbControl(raw_db)
+    db.inform()
+    id = db.get_id("select ROWID from tblRawCatalog where PRESSMARK = '5.1-1-2'")
+    print(f"{id=}")
+    db.close()
+
+    with dbControl(raw_db) as db:
+        id = db.get_id("select ROWID from tblRawCatalog where PRESSMARK = '5.1-1-2'")
+        print(f"{id=}")

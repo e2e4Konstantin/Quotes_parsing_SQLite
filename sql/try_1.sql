@@ -126,7 +126,13 @@ CREATE TABLE IF NOT EXISTS tblQuotes
 CREATE UNIQUE INDEX idx_code_tblQuotes ON tblQuotes (code);
 
 
+SELECT ROW_NUMBER() OVER (ORDER BY PRESSMARK) RowNum, * FROM tblRawCatalog;
+SELECT ROW_NUMBER() OVER (PARTITION BY PARENT_PRESSMARK ORDER BY PRESSMARK) RowNum, * FROM tblRawCatalog;
+SELECT * FROM (SELECT ROW_NUMBER() OVER (PARTITION BY PARENT_PRESSMARK ORDER BY PRESSMARK) RowNum, * FROM tblRawCatalog) t WHERE RowNum > 3;
 
 
+select ROWID, * from tblRawCatalog where PRESSMARK = '5.1-1-2'
+
+select *, ROWID  from tblRawCatalog where PRESSMARK = '5.1-1-2';
 
 

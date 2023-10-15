@@ -6,7 +6,7 @@ from data_storage.sql_creates import sql_creates
 def create_tables(db_filename: str):
     """ Создает таблицы, индексы и триггеры. """
 
-    with dbControl(db_filename) as cursor:
+    with dbControl(db_filename) as db:
         # # для хранения Разделов
         # cursor.execute(sql_creates["create_table_subsections"])
         # cursor.execute(sql_creates["create_index_subsections"])
@@ -24,26 +24,26 @@ def create_tables(db_filename: str):
         # cursor.execute(sql_creates["create_trigger_history_tables"])
 
         # для хранения Справочника элементов каталога
-        cursor.execute(sql_creates["create_table_catalog_items"])
-        cursor.execute(sql_creates["create_index_name_catalog_items"])
+        db.cursor.execute(sql_creates["create_table_catalog_items"])
+        db.cursor.execute(sql_creates["create_index_name_catalog_items"])
 
         # для хранения Каталога
-        cursor.execute(sql_creates["create_table_catalogs"])
-        cursor.execute(sql_creates["create_index_code_catalog"])
+        db.cursor.execute(sql_creates["create_table_catalogs"])
+        db.cursor.execute(sql_creates["create_index_code_catalog"])
         # для хранения истории Каталога
-        cursor.execute(sql_creates["create_table_history_catalog"])
-        cursor.execute(sql_creates["create_index_catalog_history"])
-        cursor.execute(sql_creates["create_trigger_history_catalog"])
-        cursor.execute(sql_creates["create_trigger_update_catalog"])
+        db.cursor.execute(sql_creates["create_table_history_catalog"])
+        db.cursor.execute(sql_creates["create_index_catalog_history"])
+        db.cursor.execute(sql_creates["create_trigger_history_catalog"])
+        db.cursor.execute(sql_creates["create_trigger_update_catalog"])
 
 
         # для хранения Расценок
-        cursor.execute(sql_creates["create_table_quotes"])
-        cursor.execute(sql_creates["create_index_quotes"])
+        db.cursor.execute(sql_creates["create_table_quotes"])
+        db.cursor.execute(sql_creates["create_index_quotes"])
         # для хранения истории Расценок
-        cursor.execute(sql_creates["create_table_history_quotes"])
-        cursor.execute(sql_creates["create_index_quotes_history"])
-        cursor.execute(sql_creates["create_trigger_history_quotes"])
+        db.cursor.execute(sql_creates["create_table_history_quotes"])
+        db.cursor.execute(sql_creates["create_index_quotes_history"])
+        db.cursor.execute(sql_creates["create_trigger_history_quotes"])
 
 
 

@@ -160,6 +160,7 @@ sql_creates = {
                 name       			TEXT NOT NULL,
                 eng_name    		TEXT NOT NULL,
                 parent_item         INTEGER REFERENCES tblCatalogItems (ID_tblCatalogItem),
+                rank                INTEGER NOT NULL,
                 UNIQUE (name)
             );
         """,
@@ -168,7 +169,7 @@ sql_creates = {
         CREATE UNIQUE INDEX IF NOT EXISTS idx_name_catalog_items ON tblCatalogItems (name);
         """,
 
-    "insert_catalog_item": """INSERT INTO tblCatalogItems (name, eng_name, parent_item) VALUES (?, ?, ?);""",
+    "insert_catalog_item": """INSERT INTO tblCatalogItems (name, eng_name, parent_item, rank) VALUES (?, ?, ?, ?);""",
 
 }
 

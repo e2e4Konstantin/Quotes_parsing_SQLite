@@ -33,8 +33,9 @@ class dbControl:
     def connect(self):
         try:
             self.connection = sqlite3.connect(self.path, check_same_thread=False)
+            self.connection.row_factory = sqlite3.Row
             self.cursor = self.connection.cursor()
-            # self.__db_connection.row_factory = sqlite3.Row
+
             self.connection.create_function("REGEXP", 2, self.regex)
         except sqlite3.Error as err:
             self.close(err)

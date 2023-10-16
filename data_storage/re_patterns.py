@@ -1,8 +1,9 @@
 import re
 from dataclasses import dataclass
-
-_items_eng = ['chapter', 'collection', 'section', 'subsection', 'table', 'quote']
-_items_rus = ['глава', 'сборник', 'отдел', 'раздел', 'таблица', 'расценка']
+#
+# _items_eng =    ['chapter', 'collection', 'section', 'subsection', 'table',   'quote']
+# _items_parent = [ 1,         2,            3,         4,            5,         6]
+# _items_rus =    ['глава',   'сборник',    'отдел',   'раздел',     'таблица', 'расценка']
 
 _item_patterns: dict[str:str] = {
     'directory': r"^\s*0000\s*$",
@@ -38,6 +39,7 @@ _compiled_item_patterns = {
 @dataclass
 class ItemCatalog:
     rank: int
+    parent: int
     name: str
     pattern: str | None
     compiled: re.Pattern | None
@@ -46,30 +48,30 @@ class ItemCatalog:
 
 items_data: dict[str: ItemCatalog] = {
     'directory': ItemCatalog(
-        1, 'справочник', _item_patterns['directory'], _compiled_item_patterns['directory'], None
+        100, 1, 'справочник', _item_patterns['directory'], _compiled_item_patterns['directory'], None
     ),
     'chapter': ItemCatalog(
-        2, 'глава', _item_patterns['chapter'], _compiled_item_patterns['chapter'],
+        90, 1, 'глава', _item_patterns['chapter'], _compiled_item_patterns['chapter'],
         _compiled_item_patterns['chapter_prefix']
     ),
     'collection': ItemCatalog(
-        3, 'сборник', _item_patterns['collection'], _compiled_item_patterns['collection'],
+        80, 2, 'сборник', _item_patterns['collection'], _compiled_item_patterns['collection'],
         _compiled_item_patterns['collection_prefix']
     ),
     'section': ItemCatalog(
-        4, 'отдел', _item_patterns['section'], _compiled_item_patterns['section'],
+        70, 3, 'отдел', _item_patterns['section'], _compiled_item_patterns['section'],
         _compiled_item_patterns['section_prefix']
     ),
     'subsection': ItemCatalog(
-        5, 'раздел', _item_patterns['subsection'], _compiled_item_patterns['subsection'],
+        60, 4, 'раздел', _item_patterns['subsection'], _compiled_item_patterns['subsection'],
         _compiled_item_patterns['subsection_prefix']
     ),
     'table': ItemCatalog(
-        6, 'таблица', _item_patterns['table'], _compiled_item_patterns['table'],
+        50, 5, 'таблица', _item_patterns['table'], _compiled_item_patterns['table'],
         _compiled_item_patterns['table_prefix']
     ),
     'quote': ItemCatalog(
-        7, 'расценка', _item_patterns['quote'], _compiled_item_patterns['quote'], None
+        40, 6, 'расценка', _item_patterns['quote'], _compiled_item_patterns['quote'], None
     ),
 }
 

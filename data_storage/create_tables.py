@@ -1,6 +1,8 @@
 
 from data_storage.db_settings import dbControl
 from data_storage.sql_creates import sql_creates
+from data_storage.sql_tools import sql_views
+
 
 
 def create_tables(db_filename: str):
@@ -35,6 +37,10 @@ def create_tables(db_filename: str):
         db.cursor.execute(sql_creates["create_index_catalog_history"])
         db.cursor.execute(sql_creates["create_trigger_history_catalog"])
         db.cursor.execute(sql_creates["create_trigger_update_catalog"])
+        # представления каталога
+        db.cursor.execute(sql_views["create_view_main_catalog"])
+
+
 
 
         # для хранения Расценок

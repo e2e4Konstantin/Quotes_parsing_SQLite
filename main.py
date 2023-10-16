@@ -10,7 +10,7 @@ from pprint import pprint
 from data_extraction import read_data_frame, info_data_frame
 from data_storage import (write_catalog_to_db, write_quotes_to_db,
                           dbControl, create_tables, transfer_raw_quotes,
-                          fill_catalog_items, insert_upper_level_items, transfer_raw_items_to_catalog)
+                          fill_catalog_items, transfer_raw_data_to_catalog)
 
 from data_storage import items_data
 
@@ -46,12 +46,7 @@ if __name__ == "__main__":
 
     create_tables(operating_db)
     fill_catalog_items(operating_db)                                            # создаем справочник объектов каталога
-    insert_upper_level_items('directory', operating_db, period)
-    transfer_raw_items_to_catalog('chapter', operating_db, raw_db, period)
-    transfer_raw_items_to_catalog('collection', operating_db, raw_db, period)
-    transfer_raw_items_to_catalog('section', operating_db, raw_db, period)
-    transfer_raw_items_to_catalog('subsection', operating_db, raw_db, period)
-    transfer_raw_items_to_catalog('table', operating_db, raw_db, period)
+    transfer_raw_data_to_catalog(operating_db, raw_db, period)
 
 
 

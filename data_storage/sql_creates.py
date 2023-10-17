@@ -28,7 +28,8 @@ sql_creates = {
             code                        TEXT    NOT NULL,
             description                 TEXT    NOT NULL,
             measure                     TEXT    NOT NULL,
-            parent_quote                INTEGER REFERENCES tblQuotes (ID_tblQuote),  
+            parent_quote                INTEGER REFERENCES tblQuotes (ID_tblQuote),
+            absolute_code               TEXT    NOT NULL,  
             FK_tblQuotes_tblCatalogs    INTEGER NOT NULL,
             FOREIGN KEY (FK_tblQuotes_tblCatalogs) REFERENCES tblCatalogs (ID_tblCatalog),
             UNIQUE (code)
@@ -39,8 +40,10 @@ sql_creates = {
         """,
 
     "insert_quote": """
-        INSERT INTO tblQuotes (period, code, description, measure, parent_quote, FK_tblQuotes_tblCatalogs) 
-        VALUES (?, ?, ?, ?, ?, ?);
+        INSERT INTO tblQuotes (
+            period, code, description, measure, parent_quote, absolute_code, FK_tblQuotes_tblCatalogs
+            ) 
+        VALUES (?, ?, ?, ?, ?, ?, ?);
         """,
 
     # для истории Расценок
@@ -53,6 +56,7 @@ sql_creates = {
             description                 TEXT    NOT NULL,
             measure                     TEXT    NOT NULL,
             parent_quote                INTEGER,
+            absolute_code               TEXT    NOT NULL,
             FK_tblQuotes_tblCatalogs    INTEGER NOT NULL,
             _version INTEGER,
             _updated INTEGER
@@ -68,12 +72,13 @@ sql_creates = {
         AFTER INSERT ON tblQuotes
         BEGIN
             INSERT INTO _tblQuotesHistory (
-                _rowid, ID_tblQuote, period, code, description, measure, parent_quote, FK_tblQuotes_tblCatalogs, 
-                _version, _updated
+                _rowid, ID_tblQuote, period, code, description, measure, parent_quote, absolute_code, 
+                FK_tblQuotes_tblCatalogs, _version, _updated
                 )
             VALUES (
-                new.rowid, new.ID_tblQuote, new.period, new.code, new.description, new.measure, new.parent_quote, 
-                new.FK_tblQuotes_tblCatalogs, 1, cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer)
+                new.rowid, new.ID_tblQuote, new.period, new.code, new.description, new.measure, 
+                new.parent_quote, new.absolute_code, new.FK_tblQuotes_tblCatalogs, 1, 
+                cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer)
                 );
         END;
         """,

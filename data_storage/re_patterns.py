@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass
+
 #
 # _items_eng =    ['chapter', 'collection', 'section', 'subsection', 'table',   'quote']
 # _items_parent = [ 1,         2,            3,         4,            5,         6]
@@ -16,23 +17,23 @@ _item_patterns: dict[str:str] = {
 }
 
 _compiled_item_patterns = {
-    'directory':    re.compile(_item_patterns['directory']),
-    'chapter':      re.compile(_item_patterns['chapter']),
-    'collection':   re.compile(_item_patterns['collection']),
-    'section':      re.compile(_item_patterns['section']),
-    'subsection':   re.compile(_item_patterns['subsection']),
-    'table':        re.compile(_item_patterns['table']),
-    'quote':        re.compile(_item_patterns['quote']),
+    'directory': re.compile(_item_patterns['directory']),
+    'chapter': re.compile(_item_patterns['chapter']),
+    'collection': re.compile(_item_patterns['collection']),
+    'section': re.compile(_item_patterns['section']),
+    'subsection': re.compile(_item_patterns['subsection']),
+    'table': re.compile(_item_patterns['table']),
+    'quote': re.compile(_item_patterns['quote']),
 
     'subsection_groups': re.compile(r"(^\d+\.\d+-\d+-)(\d+)\s*"),
-    'wildcard':          re.compile(r"[\t\n\r\f\v\s+]+"),
-    'code_valid_chars':  re.compile(r"[^\d+.-]+"),
+    'wildcard': re.compile(r"[\t\n\r\f\v\s+]+"),
+    'code_valid_chars': re.compile(r"[^\d+.-]+"),
 
-    'table_prefix':         re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),   # Таблица 3.1-4.
-    'subsection_prefix':    re.compile(r"^\s*Раздел\s*((\d+)\.)*"),            # Раздел 7.
-    'section_prefix':       re.compile(r"^\s*Отдел\s*((\d+)\.)*"),                # Отдел 7.
-    'collection_prefix':    re.compile(r"^\s*Сборник\s*((\d+)\.)*"),           # Сборник 7.
-    'chapter_prefix':       re.compile(r"^\s*Глава\s*((\d+)\.)*"),                # Глава 7.
+    'table_prefix': re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),  # Таблица 3.1-4.
+    'subsection_prefix': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),  # Раздел 7.
+    'section_prefix': re.compile(r"^\s*Отдел\s*((\d+)\.)*"),  # Отдел 7.
+    'collection_prefix': re.compile(r"^\s*Сборник\s*((\d+)\.)*"),  # Сборник 7.
+    'chapter_prefix': re.compile(r"^\s*Глава\s*((\d+)\.)*"),  # Глава 7.
 }
 
 
@@ -105,9 +106,13 @@ def title_extraction(title: str, item_name: str) -> str | None:
 
 
 def split_code(src_code: str) -> tuple:
-    """ Разбивает шифр на части.
-     '4.1-2-10' -> (4, 1, 2, 10)"""
+    """ Разбивает шифр на части. '4.1-2-10' -> ('4', '1', '2', '10')"""
     return tuple(re.split('[.-]', src_code)) if src_code else tuple()
+
+
+def split_code_int(src_code: str):
+    """ Разбивает шифр на части из чисел. '4.1-2-10' -> (4, 1, 2, 10)"""
+    return tuple(map(int, re.split('[.-]', src_code))) if src_code else tuple()
 
 
 def identify_item(src_code: str) -> tuple:

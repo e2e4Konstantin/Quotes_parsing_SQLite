@@ -13,14 +13,21 @@ sql_selects = {
 
     "select_period_code_catalog":   """SELECT ID_tblCatalog FROM tblCatalogs WHERE period = ? and code = ?;""",
     "select_period_catalog":        """SELECT * FROM tblCatalogs WHERE period IS ?;""",
-    "select_period_item_catalog":
-        """
+    "select_period_item_catalog":   """
             SELECT ID_tblCatalog, period, code, item.name, description 
             FROM tblCatalogs 
             LEFT JOIN tblCatalogItems AS item ON item.ID_tblCatalogItem = FK_tblCatalogs_tblCatalogItems
             WHERE period = ? and item.name = ?;
         """,
-    "select_parent_catalog":        """SELECT * FROM tblCatalogs WHERE id_parent = ? and id_parent <> ID_tblCatalog;""",
+    "select_parent_catalog":        """
+        -- выбирает все записи для родителя '?' исключая корневую запись
+        SELECT 
+            ID_tblCatalog, period, code, item.name AS item, description, raw_parent, ID_parent, 
+            FK_tblCatalogs_tblCatalogItems
+        FROM tblCatalogs 
+        LEFT JOIN tblCatalogItems AS item ON item.ID_tblCatalogItem = FK_tblCatalogs_tblCatalogItems
+        WHERE id_parent <> ID_tblCatalog and id_parent = ?;
+        """,
 
 }
 

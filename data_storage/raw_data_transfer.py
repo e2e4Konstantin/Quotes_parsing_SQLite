@@ -7,7 +7,10 @@ from data_storage.db_settings import dbControl
 from data_storage.sql_creates import sql_creates
 from data_storage.sql_tools import sql_selects, sql_update
 
-from data_storage.re_patterns import identify_item, items_data, remove_wildcard, clear_code, title_extraction
+from data_storage.re_patterns import (
+    identify_item, items_data, remove_wildcard, clear_code,
+    title_extraction, split_code, split_code_int, extract_code
+)
 from file_features import output_message
 
 
@@ -25,7 +28,7 @@ from file_features import output_message
 #
 
 
-def clean_quote(src_quote: tuple[str, str, str, str]) -> tuple[str, str, str, str]:
+def _clean_quote(src_quote: tuple[str, str, str, str]) -> tuple[str, str, str, str]:
     """ Получает данные о расценке очищает/готовит их и возвращает обратно """
     table_code = extract_code(source=src_quote[0], item_name='table')
     quote_code = extract_code(source=src_quote[1], item_name='quote')
@@ -43,23 +46,32 @@ def clean_quote(src_quote: tuple[str, str, str, str]) -> tuple[str, str, str, st
 
 def transfer_raw_quotes(operating_db_filename: str, raw_db_filename: str, period: int):
     """ Записывает расценки из сырой базы в рабочую """
-    with dbControl(raw_db_filename) as raw_cursor, dbControl(operating_db_filename) as operating_cursor:
-        raw_cursor.execute(sql_creates["select_quotes_from_raw"])
-        quotes = raw_cursor.fetchall()
-        for quote in quotes:
-            table_code, quote_code, description, measure = clean_quote(quote)
-            result = operating_cursor.execute("""select ID_tblTable from tblTables where code IS ?""", (table_code,))
-            if result is None:
-                print(f"для расценки {quote_code!r} не найдена таблица {table_code!r}")
-            else:
-                (found_table_id,) = result.fetchone()
-                # print(f"{found_table_id=}")
-                # period, code, description, measure, related_quote, FK_tblQuotes_tblTables
-                data = (period, quote_code, description, measure, 0, found_table_id)
-                message = ' '.join(['вставка расценки', quote_code])
-                inserted_id = try_insert(operating_cursor, "insert_quote", data, message)
-                # if inserted_id:
-                #     print(f"вставлена расценка: {quote_code} id: {inserted_id}")
+    with dbControl(raw_db_filename) as raw_db, dbControl(operating_db_filename) as operating_db:
+        result = raw_db.connection.execute(sql_creates["select_quotes_from_raw"])
+        rows = result.fetchall()
+        if rows:
+            success = []
+            quotes = [x for x in rows]
+            quotes.sort(key=lambda x: split_code_int(x['PRESSMARK']))
+            for quote in quotes:
+                table_code, quote_code, description, measure = _clean_quote(quote)
+                query = sql_selects["select_period_code_catalog"]
+                result = operating_db.connection.execute(query, (period, table_code,))
+                if result is None:
+                    print(f"для расценки {quote_code!r} не найдена таблица {table_code!r}")
+                else:
+                    (found_table_id,) = result.fetchone()
+                    # print(f"{found_table_id=}")
+                    # period, code, description, measure, parent_quote, absolute_code, FK_tblQuotes_tblTables
+                    parent_quote = 0
+                    absolute_code = f"{table_code}-{split_code(quote_code)[-1]}"
+                    data = (period, quote_code, description, measure, parent_quote, absolute_code, found_table_id)
+                    message = ' '.join(['вставка расценки', quote_code])
+                    inserted_id = operating_db.try_insert(sql_creates["insert_quote"], data, message)
+                    if inserted_id:
+                        success.append(inserted_id)
+                    #     print(f"вставлена расценка: {quote_code} id: {inserted_id}")
+            print(f"добавлено {len(success)} записей {items_data['quote'].name.capitalize()!r}, период {period}.")
 
 
 def fill_catalog_items(db_filename: str):

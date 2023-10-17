@@ -104,7 +104,7 @@ class dbControl:
                     data = table_info.fetchall()
 
                     print(f"поля таблицы: ")
-                    print([d for d in data])
+                    print([tuple(d) for d in data])
                     if all_details:
                         print(f"данные таблицы:")
                         self.cursor.execute(f"SELECT * from {table_name}")

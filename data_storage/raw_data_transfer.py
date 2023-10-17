@@ -141,7 +141,7 @@ def _transfer_raw_items_to_catalog(item_name: str, operating_db_filename: str, r
                             success.append(inserted_id)
                             # print(inserted_id, data, item)
                     else:
-                        output_message(f"запись {item}", f"не добавлена в БД")
+                        output_message(f"запись {tuple(item)}", f"не добавлена в БД")
                 else:
                     output_message(f"не распознан шифр записи {code}:", f"{items_data[item_name].pattern}")
             print(f"добавлено {len(success)} записей {items_data[item_name].name.capitalize()!r}, период {period}.")

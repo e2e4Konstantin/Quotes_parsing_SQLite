@@ -1,6 +1,8 @@
 
 sql_creates = {
     "table_name_raw_catalog": """tblRawCatalog""",
+    "table_name_raw_statistics": """tblRawStatistics""",
+
     "delete_table_raw_catalog": """DROP TABLE IF EXISTS tblRawCatalog;""",
     "table_name_raw_quotes": """tblRawQuotes""",
     "delete_table_raw_quote": """DROP TABLE IF EXISTS tblRawQuotes;""",
@@ -12,6 +14,12 @@ sql_creates = {
     "select_all_raw_catalog": """SELECT * FROM tblRawCatalog;""",
 
     "select_quotes_from_raw": """SELECT * FROM tblRawQuotes""",
+
+    "select_raw_statistics_code": """SELECT * FROM tblRawStatistics WHERE PERIOD = ? AND PRESSMARK = ?;""",
+
+    "add_column_raw_quotes": """ ALTER TABLE tblRawQuotes ADD COLUMN STATISTICS DEFAULT 0 NOT NULL;""",
+
+    
 
 
 
@@ -28,6 +36,7 @@ sql_creates = {
             code                        TEXT    NOT NULL,
             description                 TEXT    NOT NULL,
             measure                     TEXT    NOT NULL,
+            statistics                  INTEGER DEFAULT 0 NOT NULL, 
             parent_quote                INTEGER REFERENCES tblQuotes (ID_tblQuote),
             absolute_code               TEXT    NOT NULL,  
             FK_tblQuotes_tblCatalogs    INTEGER NOT NULL,
@@ -41,9 +50,9 @@ sql_creates = {
 
     "insert_quote": """
         INSERT INTO tblQuotes (
-            period, code, description, measure, parent_quote, absolute_code, FK_tblQuotes_tblCatalogs
+            period, code, description, measure, statistics, parent_quote, absolute_code, FK_tblQuotes_tblCatalogs
             ) 
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         """,
 
     # для истории Расценок
@@ -55,6 +64,7 @@ sql_creates = {
             code                        TEXT    NOT NULL,
             description                 TEXT    NOT NULL,
             measure                     TEXT    NOT NULL,
+            statistics                  INTEGER NOT NULL,
             parent_quote                INTEGER,
             absolute_code               TEXT    NOT NULL,
             FK_tblQuotes_tblCatalogs    INTEGER NOT NULL,
@@ -72,18 +82,21 @@ sql_creates = {
         AFTER INSERT ON tblQuotes
         BEGIN
             INSERT INTO _tblQuotesHistory (
-                _rowid, ID_tblQuote, period, code, description, measure, parent_quote, absolute_code, 
+                _rowid, ID_tblQuote, period, code, description, measure, statistics, parent_quote, absolute_code, 
                 FK_tblQuotes_tblCatalogs, _version, _updated
                 )
             VALUES (
-                new.rowid, new.ID_tblQuote, new.period, new.code, new.description, new.measure, 
+                new.rowid, new.ID_tblQuote, new.period, new.code, new.description, new.measure, new.statistics,
                 new.parent_quote, new.absolute_code, new.FK_tblQuotes_tblCatalogs, 1, 
                 cast((julianday('now') - 2440587.5) * 86400 * 1000 as integer)
                 );
         END;
         """,
 
-    # --- > Каталог ------------------------------
+
+
+
+    # --- > Каталог -------------------------------------------------------------------------------
     "create_table_catalogs": """
         CREATE TABLE IF NOT EXISTS tblCatalogs
             (

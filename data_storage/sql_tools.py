@@ -8,7 +8,7 @@ sql_selects = {
     "select_all_catalog_items":     """SELECT * FROM tblCatalogItems;""",
     "select_root_catalog_items":    """SELECT * FROM tblCatalogItems WHERE ID_tblCatalogItem = parent_item;""",
 
-
+    "select_quotes_all":    """SELECT * FROM tblQuotes;""",
 
 
     "select_period_code_catalog":   """SELECT ID_tblCatalog FROM tblCatalogs WHERE period = ? and code = ?;""",
@@ -34,6 +34,7 @@ sql_selects = {
 sql_update = {
 
     "update_catalog_id_parent": """UPDATE tblCatalogs SET ID_parent = ? WHERE ID_tblCatalog = ?;""",
+    "update_quote_statistics_by_id": """UPDATE tblQuotes SET statistics = ? WHERE ID_tblQuote = ?;"""
 
 }
 

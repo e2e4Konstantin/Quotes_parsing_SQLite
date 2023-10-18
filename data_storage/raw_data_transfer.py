@@ -62,10 +62,11 @@ def transfer_raw_quotes(operating_db_filename: str, raw_db_filename: str, period
                 else:
                     (found_table_id,) = result.fetchone()
                     # print(f"{found_table_id=}")
-                    # period, code, description, measure, parent_quote, absolute_code, FK_tblQuotes_tblTables
+                    # period, code, description, measure, statistics, parent_quote, absolute_code, FK_tblQuotes_tblTables
                     parent_quote = 0
+                    statistics = 0
                     absolute_code = f"{table_code}-{split_code(quote_code)[-1]}"
-                    data = (period, quote_code, description, measure, parent_quote, absolute_code, found_table_id)
+                    data = (period, quote_code, description, measure, statistics, parent_quote, absolute_code, found_table_id)
                     message = ' '.join(['вставка расценки', quote_code])
                     inserted_id = operating_db.try_insert(sql_creates["insert_quote"], data, message)
                     if inserted_id:
@@ -156,3 +157,30 @@ def transfer_raw_data_to_catalog(operating_db: str, raw_db: str, period: int):
     items = ['chapter', 'collection', 'section', 'subsection', 'table']
     for item in items:
         _transfer_raw_items_to_catalog(item, operating_db, raw_db, period)
+
+
+def update_statistics_from_raw_data(operating_db_file: str, raw_db_file: str):
+    """ . """
+
+    with dbControl(raw_db_file) as raw_db, dbControl(operating_db_file) as operate_db:
+        result = operate_db.connection.execute(sql_selects["select_quotes_all"])
+        quotes = result.fetchall()
+        if quotes:
+            success = []
+            for quote in quotes:
+                # print(tuple(quote))
+                code = quote['code']
+                period = quote['period']
+                stat_result = raw_db.connection.execute(sql_creates["select_raw_statistics_code"], (period, code))
+                raw_quote_stat = stat_result.fetchone()
+                if raw_quote_stat:
+                    print(tuple(raw_quote_stat))
+                    update = operate_db.connection.execute(sql_update["update_quote_statistics_by_id"], (raw_quote_stat['POSITION'], quote['ID_tblQuote']))
+                    success.append(tuple(raw_quote_stat))
+            print(f"обновили статистику у {len(success)} расценок.")
+
+        raw_6 = raw_db.connection.execute("""SELECT * FROM tblRawStatistics WHERE PRESSMARK REGEXP "^6\.\d+";""")
+        raw_stat_chapter_6 = raw_6.fetchall()
+        raw_list = [x['PRESSMARK'] for x in raw_stat_chapter_6]
+        r_all = len(raw_list)
+        print(f"6 глава, статистика, исходных записей: {r_all}, дублей: {r_all-len(set(raw_list))}")

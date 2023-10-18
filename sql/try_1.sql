@@ -136,3 +136,7 @@ select ROWID, * from tblRawCatalog where PRESSMARK = '5.1-1-2'
 select *, ROWID  from tblRawCatalog where PRESSMARK = '5.1-1-2';
 
 
+SELECT * FROM tblRawStatistics WHERE PRESSMARK REGEXP "^6\.\d+";
+SELECT ROWID, PRESSMARK, COUNT(*) AS count FROM tblRawStatistics GROUP BY PRESSMARK HAVING count > 1;
+
+

@@ -34,7 +34,8 @@ from data_storage import items_data
 
 
 def get_raw_data(db_path: str, db_name):
-    file_names = [r"src\catalog_3_68.xlsx", r"src\catalog_4_68.xlsx", r"src\catalog_5_67.xlsx"]
+    # file_names = [r"src\catalog_3_68.xlsx", r"src\catalog_4_68.xlsx", r"src\catalog_5_67.xlsx"]
+    file_names = [r"src\catalog_6_68.xlsx", ]
     files = [os.path.join(db_path, file) for file in file_names]
 
     with dbControl(db_name) as db:
@@ -46,8 +47,8 @@ def get_raw_data(db_path: str, db_name):
 
 
 if __name__ == "__main__":
-    # path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
-    path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
+    path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
+    # path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
 
     # читаем данные из исходных файлов во временную БД
     raw_db_name = r"output\RawCatalog.sqlite"
@@ -61,12 +62,12 @@ if __name__ == "__main__":
     # d.inform()
     # d.close()
 
-    create_tables(operating_db)
-    fill_catalog_items(operating_db)                                            # создаем справочник объектов каталога
-    transfer_raw_data_to_catalog(operating_db, raw_db, period)
-    # catalog_print(operating_db, period)
-    transfer_raw_quotes(operating_db, raw_db, period)
-
-    d = dbControl(operating_db)
-    d.inform()
-    d.close()
+    # create_tables(operating_db)
+    # fill_catalog_items(operating_db)                                            # создаем справочник объектов каталога
+    # transfer_raw_data_to_catalog(operating_db, raw_db, period)
+    catalog_print(operating_db, period)
+    # transfer_raw_quotes(operating_db, raw_db, period)
+    #
+    # d = dbControl(operating_db)
+    # d.inform()
+    # d.close()

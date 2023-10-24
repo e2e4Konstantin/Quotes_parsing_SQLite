@@ -6,6 +6,21 @@ from data_storage.db_settings import dbControl
 from data_storage.sql_creates import sql_creates
 
 
+# def write_catalog_raw_data(db_name: str, data_file: str):
+#     """ Читает данные из файла в DF. DF записывает в raw базу данных. """
+#
+#     catalog_data = read_data_frame(excel_file_name=data_file, sheet_name='Sheet', use_columns=[0, 1, 2])
+#     quotes_data = read_data_frame(excel_file_name=data_file, sheet_name='quotes', use_columns=[0, 1, 2, 3])
+#     with dbControl(db_name) as db:
+#         catalog_data.to_sql(name=sql_creates["table_name_raw_catalog"], con=db.connection, if_exists='append',
+#                             index=False)
+#         quotes_data.to_sql(name=sql_creates["table_name_raw_quotes"], con=db.connection, if_exists='append',
+#                            index=False)
+#     del catalog_data
+#     del quotes_data
+
+
+
 def write_file_raw_data(db_name: str, data_file: str):
     """ Читает данные из файла в DF. DF записывает в raw базу данных. """
 

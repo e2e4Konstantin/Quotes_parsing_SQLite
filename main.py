@@ -16,7 +16,7 @@ from data_storage import (dbControl, sql_creates, write_file_raw_data, update_st
 
 def get_raw_data(db_path: str, db_name):
     # file_names = [r"src\catalog_3_68.xlsx", r"src\catalog_4_68.xlsx", r"src\catalog_5_67.xlsx"]
-    file_names = [r"src\catalog_6_68.xlsx", ]
+    file_names = [r"src\catalog_6_68.xlsx", r"src\catalog_10_68.xlsx"]
     files = [os.path.join(db_path, file) for file in file_names]
 
     with dbControl(db_name) as db:
@@ -41,20 +41,20 @@ if __name__ == "__main__":
     operating_db = os.path.join(path, operating_db_name)
     period = 68
 
-    # читаем данные из исходных файлов во raw БД
+    # # читаем данные из исходных файлов во raw БД
+    # # читаем статистику в отдельную таблицу
     # get_raw_data(path, raw_db)
-    # читаем статистику в отдельную таблицу
     # write_statistics_raw_data(raw_db, stat_file, period)
-
     # d = dbControl(raw_db)
     # d.inform()
     # d.close()
 
-    # create_tables(operating_db)
+    # создаем структуру бд
+    create_tables(operating_db)
     # создаем справочник объектов каталога
-    # fill_catalog_items(operating_db)
-    # transfer_raw_data_to_catalog(operating_db, raw_db, period)
-    # transfer_raw_quotes(operating_db, raw_db, period)
+    fill_catalog_items(operating_db)
+    transfer_raw_data_to_catalog(operating_db, raw_db, period)
+    transfer_raw_quotes(operating_db, raw_db, period)
 
     update_statistics_from_raw_data(operating_db, raw_db)
 

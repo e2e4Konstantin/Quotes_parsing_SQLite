@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # d.inform()
     # d.close()
 
-    # создаем структуру бд
+    # создаем структуру БД
     create_tables(operating_db)
     # создаем справочник объектов каталога
     fill_catalog_items(operating_db)

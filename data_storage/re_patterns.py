@@ -138,6 +138,14 @@ def identify_item(src_code: str) -> tuple:
     return tuple()
 
 
+def check_code_item(src_code: str, item_name) -> bool:
+    """ Проверяет, соответствует ли код указаному типц"""
+    check_types = identify_item(src_code)
+    if len(check_types) > 0 and check_types[0] == item_name:
+        return True
+    return False
+
+
 if __name__ == "__main__":
     s = '5  . 1-1-1-0-   1   '
     s2 = remove_wildcard(s)

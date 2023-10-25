@@ -1,29 +1,23 @@
 
 sql_creates = {
-    "table_name_raw_catalog": """tblRawCatalog""",
-    "table_name_raw_statistics": """tblRawStatistics""",
-
-    "delete_table_raw_catalog": """DROP TABLE IF EXISTS tblRawCatalog;""",
-    "table_name_raw_quotes": """tblRawQuotes""",
-    "delete_table_raw_quote": """DROP TABLE IF EXISTS tblRawQuotes;""",
-
+    # --- > Имена таблиц --------------------------------------------------------------------------
+    "table_name_raw_catalog":       """tblRawCatalog""",
+    "table_name_raw_quotes":        """tblRawQuotes""",
+    "table_name_raw_statistics":    """tblRawStatistics""",
+    # --- > Удаление таблиц -----------------------------------------------------------------------
+    "delete_table_raw_catalog":     """DROP TABLE IF EXISTS tblRawCatalog;""",
+    "delete_table_raw_quote":       """DROP TABLE IF EXISTS tblRawQuotes;""",
+    "delete_table_raw_statistics":  """DROP TABLE IF EXISTS tblRawStatistics;""",
+    # --- > Получение данных ----------------------------------------------------------------------
     "select_items_from_raw_catalog": """SELECT * FROM tblRawCatalog WHERE PRESSMARK REGEXP ?;""",
-
     "select_raw_catalog_code_re": """SELECT * FROM tblRawCatalog WHERE PRESSMARK REGEXP ?;""",
-
     "select_all_raw_catalog": """SELECT * FROM tblRawCatalog;""",
-
     "select_quotes_from_raw": """SELECT * FROM tblRawQuotes""",
-
     "select_raw_statistics_code": """SELECT * FROM tblRawStatistics WHERE PERIOD = ? AND PRESSMARK = ?;""",
-
+    # --- > Добавление данных ---------------------------------------------------------------------
     "add_column_raw_quotes": """ ALTER TABLE tblRawQuotes ADD COLUMN STATISTICS DEFAULT 0 NOT NULL;""",
 
-    
-
-
-
-    # --- > Расценки --------------------------------------------------------------------------------------------
+    # --- > Расценки ------------------------------------------------------------------------------
     # поля: id, период действия, шифр, содержание, измеритель, родительская расценка,
     # id элемента каталога к которому принадлежит расценка.
     #

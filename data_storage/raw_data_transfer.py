@@ -100,7 +100,7 @@ def _insert_upper_level_items(item_name: str, db_filename: str) -> int | None:
         query = sql_selects["select_name_catalog_items"]
         id_catalog_items = db.get_id(query, items_data[item_name].name)
         data = (1, code, 'Справочник расценок', code, 1, id_catalog_items)
-        message = ' '.join(["вставка 'Справочник'", code])
+        message = f"вставка 'Справочник' {code}"
         inserted_id = db.try_insert(sql_creates["insert_catalog"], data, message)
         # ссылка родителя самого на себя
         up_data = (inserted_id, inserted_id)
@@ -140,7 +140,8 @@ def _transfer_raw_items_to_catalog(item_name: str, operating_db_filename: str, r
                 code = clear_code(item["PRESSMARK"])
                 # по коду определяем тип записи и проверяем на соответствие
                 if check_code_item(code, item_name):
-                    raw_parent_code = clear_code(item["PARENT_PRESSMARK"])
+                    value = item["PARENT_PRESSMARK"]
+                    raw_parent_code = clear_code(value) if value is not None else "0"
                     period = item["PERIOD"]
                     parent_period = period if item_name != "chapter" else 1
                     # получить id родителя

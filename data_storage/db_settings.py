@@ -72,11 +72,13 @@ class dbControl:
             output_message(f"ошибка INSERT запроса БД Sqlite3: {' '.join(error.args)}", f"{message}")
         return None
 
-    def run_execute(self, *args, **kwargs):
+    def run_execute(self, *args, **kwargs) -> int | None:
         try:
-            self.cursor.execute(*args, **kwargs)
+            result = self.cursor.execute(*args, **kwargs)
+            return result
         except sqlite3.Error as error:
-            print(f"SQLite error: {' '.join(error.args)}")
+            output_message(f"ошибка запроса БД Sqlite3: {' '.join(error.args)}", f"{args}")
+            # print(f"SQLite error: {' '.join(error.args)}")
             # print(f"Exception class is: {error.__class__}")
             # print('SQLite traceback: ')
             # exc_type, exc_value, exc_tb = sys.exc_info()

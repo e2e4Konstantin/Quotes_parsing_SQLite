@@ -33,7 +33,7 @@ _compiled_machine_code_patterns = {
 @dataclass
 class ItemCatalog:
     name: str
-    parent_item: int
+    parent_item: str
     rating: int
     pattern: str | None
     compiled: re.Pattern | None
@@ -42,24 +42,24 @@ class ItemCatalog:
 
 machine_items: dict[str: ItemCatalog] = {
     'directory': ItemCatalog(
-        name='справочник', parent_item=1, rating=100, pattern=_machine_code_patterns['directory'],
+        name='справочник', parent_item='справочник', rating=100, pattern=_machine_code_patterns['directory'],
         compiled=_compiled_machine_code_patterns['directory'], prefix=None
         ),
     'chapter': ItemCatalog(
-        'глава', 1, 90, _machine_code_patterns['chapter'], _compiled_machine_code_patterns['chapter'],
+        'глава', 'справочник', 90, _machine_code_patterns['chapter'], _compiled_machine_code_patterns['chapter'],
         _compiled_machine_code_patterns['chapter_prefix']
         ),
     'subsection': ItemCatalog(
-        'раздел', 2, 80, _machine_code_patterns['subsection'], _compiled_machine_code_patterns['subsection'],
+        'раздел', 'глава', 80, _machine_code_patterns['subsection'], _compiled_machine_code_patterns['subsection'],
         _compiled_machine_code_patterns['subsection_prefix']
         ),
 
     'group': ItemCatalog(
-        'группа', 3, 90, _machine_code_patterns['group'], _compiled_machine_code_patterns['group'], None
+        'группа', 'раздел', 70, _machine_code_patterns['group'], _compiled_machine_code_patterns['group'], None
         ),
 
     'machine': ItemCatalog(
-        'машина', 3, 90, _machine_code_patterns['machine'], _compiled_machine_code_patterns['machine'], None
+        'машина', 'группа', 60, _machine_code_patterns['machine'], _compiled_machine_code_patterns['machine'], None
         ),
 
 }

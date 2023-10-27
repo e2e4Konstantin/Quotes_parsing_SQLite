@@ -39,3 +39,10 @@ def handle_location(data_path: str, data_file: str):
     if not os.path.isdir(output_path):
         output_message_exit(f"папка для вывода фала с результатом не найдена", f"{output_path!r}")
     return src_file, output_file
+
+
+def construct_abs_file_name(path: str, file_name: str) -> str:
+    """ Создает абсолютный маршрут к файлу. """
+    if not os.path.isdir(path):
+        output_message_exit(f"папка не найдена", f"{path!r}")
+    return os.path.join(path, file_name)

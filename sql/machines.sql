@@ -3,8 +3,9 @@ CREATE TABLE IF NOT EXISTS tblMachineItems
                 ID_tblMachineItem   INTEGER PRIMARY KEY NOT NULL,
                 name       			TEXT NOT NULL,
                 eng_name    		TEXT NOT NULL,
-                parent_item         INTEGER REFERENCES tblMachineItems (ID_tblMachineItem),
+                parent_item         TEXT NOT NULL,
                 rating              INTEGER NOT NULL,
+                ID_parent           INTEGER REFERENCES tblMachineItems (ID_tblMachineItem),
                 UNIQUE (name, rating)
             );
 
@@ -46,3 +47,24 @@ CREATE TABLE IF NOT EXISTS tblMachines
             );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_period_code_tblMachines ON tblMachinesCatalog (period, code);
+
+
+--https://stackoverflow.com/questions/52468093/sqlite-update-same-table-with-select
+
+UPDATE tblMachineItems
+	SET ID_parent =
+		(
+		SELECT mi.ID_tblMachineItem
+		FROM tblMachineItems mi
+		WHERE mi.name = tblMachineItems.parent_item
+		)
+	WHERE tblMachineItems.name = 'справочник';
+
+UPDATE tblMachineItems
+	SET ID_parent =
+		(
+		SELECT mi.ID_tblMachineItem
+		FROM tblMachineItems mi
+		WHERE mi.name = tblMachineItems.parent_item
+		)
+	WHERE tblMachineItems.name IN (SELECT cat.name FROM tblMachineItems cat);

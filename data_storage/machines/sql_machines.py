@@ -28,14 +28,29 @@ sql_creates_machines = {
                 ID_tblMachineItem   INTEGER PRIMARY KEY NOT NULL,
                 name       			TEXT NOT NULL,
                 eng_name    		TEXT NOT NULL,
-                parent_item         INTEGER REFERENCES tblMachineItems (ID_tblMachineItem),
+                parent_item         TEXT NOT NULL,
                 rating              INTEGER NOT NULL,
+                ID_parent           INTEGER REFERENCES tblMachineItems (ID_tblMachineItem),
                 UNIQUE (name, rating)
             );
         """,
     "create_index_machine_items": """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_name_tblMachineItems ON tblMachineItems (name);
         """,
+    "insert_machine_items": """
+        INSERT INTO tblMachineItems (name, eng_name, parent_item, rating) VALUES (?, ?, ?, ?);
+        """,
+    "update_parent_references": """
+        UPDATE tblMachineItems 
+            SET ID_parent = 
+                (
+                    SELECT mi.ID_tblMachineItem 
+                    FROM tblMachineItems mi 
+                    WHERE mi.name = tblMachineItems.parent_item
+                ) 
+            WHERE tblMachineItems.name IN (SELECT cat.name FROM tblMachineItems cat);
+        """,
+
 
     # ------- > Каталог для машин -----------------------------------------------------------------
     "create_table_machines_catalog": """

@@ -1,5 +1,25 @@
 import os
+import re
+
 from file_features.message import output_message_exit
+from config import DataFile
+
+
+def file_extract_period_path(file_path: str, file_name: str) -> DataFile:
+    """ Выделяет из названия файла номер периода. Создает полное имя файла.
+        Возвращает структуру. (полное_имя, период)
+    """
+    if not os.path.isdir(file_path):
+        output_message_exit(f"папка не найдена", f"{file_path!r}")
+    src_file = os.path.join(file_path, file_name)
+    if not os.path.exists(src_file):
+        output_message_exit(f"фал не найден", f"{src_file!r}")
+    re_period = re.compile(r"_(\d+)\.xlsx")
+    period = re_period.search(file_name).groups()[0]
+    if not (period and period.isdigit()):
+        output_message_exit(f"период из названия файла выделить не удалось", f"{file_name!r}")
+    return DataFile(src_file, int(period))
+
 
 
 def handle_location(data_path: str, data_file: str):

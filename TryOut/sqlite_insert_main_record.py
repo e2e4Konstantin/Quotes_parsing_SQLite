@@ -6,11 +6,11 @@ from data_storage.sql_creates import sql_creates
 from data_storage.re_patterns import identify_item, items_data
 
 item_name = 'directory'
-db_filename = 'C:\\Users\\kazak.ke\\Documents\\Задачи\\Парсинг_параметризация\\SRC\\Quotes.sqlite'
+db_filename = r'F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite\output\Quotes.sqlite'
 
 with dbControl(db_filename) as db:
-    # db.run_execute("""DROP TABLE IF EXISTS tblCatalogs;""")
-    # db.run_execute(sql_creates["create_table_catalogs"])
+    db.run_execute("""DROP TABLE IF EXISTS tblCatalogs;""")
+    db.run_execute(sql_creates["create_table_catalogs"])
 
 
     code = '0'

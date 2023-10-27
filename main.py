@@ -12,7 +12,7 @@ from data_storage import (write_raw_catalog_file_to_db, write_raw_quotes_file_to
                           update_statistics_from_raw_data,
                           create_tables, transfer_raw_quotes,
                           fill_catalog_items, transfer_raw_data_to_catalog, catalog_print)
-from config import DataFile, SrcData
+from config import DataFile, SrcData, SrcMachinesData
 import typing
 
 
@@ -63,15 +63,20 @@ def read_raw_data_to_db(db_path: str, db_name):
 if __name__ == "__main__":
     # ic.disable()
 
-    # path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite"
+    output_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite\output"
+    data_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\АИС"
     # path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
-    path = r"C:\Users\kazak.ke\Documents\Задачи\Парсинг_параметризация\SRC"
+    # path = r"C:\Users\kazak.ke\Documents\Задачи\Парсинг_параметризация\SRC"
 
     raw_db_name = r"RawCatalog.sqlite"
-    raw_db = os.path.join(path, raw_db_name)
+    raw_db = os.path.join(output_path, raw_db_name)
     operating_db_name = r"Quotes.sqlite"
-    operating_db = os.path.join(path, operating_db_name)
+    operating_db = os.path.join(output_path, operating_db_name)
     ic(raw_db, operating_db)
+
+    machines_data = SrcMachinesData(data_path, "STRUCTURE_MACHINES_2_68.xlsx", "MACHINES_2_68.xlsx")
+    ic(machines_data)
+    # read_machines(raw_db, operating_db, machines_data)
 
     # читаем данные из исходных файлов во raw БД
     # читаем статистику в отдельную таблицу
@@ -79,10 +84,10 @@ if __name__ == "__main__":
 
 
     # создаем структуру БД
-    create_tables(operating_db)
-    # создаем справочник объектов каталога
-    # fill_catalog_items(operating_db)
-    transfer_raw_data_to_catalog(operating_db, raw_db)
+    # create_tables(operating_db)
+    # # создаем справочник объектов каталога
+    # # fill_catalog_items(operating_db)
+    # transfer_raw_data_to_catalog(operating_db, raw_db)
     #
     # transfer_raw_quotes(operating_db, raw_db)
     #

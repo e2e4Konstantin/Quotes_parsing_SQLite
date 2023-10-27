@@ -1,7 +1,24 @@
-
 from data_storage.db_settings import dbControl
-from data_storage.sql_creates import sql_creates
-from data_storage.sql_tools import sql_views
+from data_storage.machines.sql_machines import sql_creates_machines
+
+
+def create_machine_tables(db_filename: str):
+    """ Удаляет таблицы. Создает таблицы и индексы для работы с 'Машинами'. """
+
+    with dbControl(db_filename) as db:
+        db.cursor.execute(sql_creates_machines["delete_table_machines"])
+        db.cursor.execute(sql_creates_machines["delete_table_machines_catalog"])
+        db.cursor.execute(sql_creates_machines["delete_table_machine_items"])
+
+        db.cursor.execute(sql_creates_machines["create_table_machine_items"])
+        db.cursor.execute(sql_creates_machines["create_table_machines_catalog"])
+        db.cursor.execute(sql_creates_machines["create_table_machines"])
+
+        db.cursor.execute(sql_creates_machines["create_index_machine_items"])
+        db.cursor.execute(sql_creates_machines["create_index_machines_catalog"])
+        db.cursor.execute(sql_creates_machines["create_index_machines"])
+
+
 
 
 

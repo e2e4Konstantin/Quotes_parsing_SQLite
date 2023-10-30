@@ -8,6 +8,7 @@ sql_creates_machines = {
     # ------ > Имена raw таблиц --------------------------------------------------------------------------
     "table_name_raw_machines_catalog":  """tblRawMachinesCatalog""",
     "table_name_raw_machines":          """tblRawMachines""",
+    "select_raw_machines_catalog_code_re": """SELECT * FROM tblRawMachinesCatalog WHERE PRESSMARK REGEXP ?;""",
 
     # --- > Удаление таблиц -----------------------------------------------------------------------
     "delete_table_machines":            """DROP TABLE IF EXISTS tblMachines;""",
@@ -50,9 +51,14 @@ sql_creates_machines = {
                 ) 
             WHERE tblMachineItems.name IN (SELECT cat.name FROM tblMachineItems cat);
         """,
+    "delete_parent_item_column": """
+        ALTER TABLE tblMachineItems DROP COLUMN parent_item;
+    """,
 
 
     # ------- > Каталог для машин -----------------------------------------------------------------
+
+    # ID_tblMachinesCatalog, period, code, description, raw_parent, ID_parent, ID_tblMachinesCatalog_tblMachineItems
     "create_table_machines_catalog": """
         CREATE TABLE IF NOT EXISTS tblMachinesCatalog
             (
@@ -95,4 +101,31 @@ sql_creates_machines = {
     "create_index_machines": """
         CREATE UNIQUE INDEX IF NOT EXISTS idx_period_code_tblMachines ON tblMachines (period, code);
     """,
+
 }
+
+# --- > Выборка элементов ---------------------------------------------------------------------
+sql_tools_machines = {
+
+    "select_name_item_machines":    """SELECT ID_tblMachineItem FROM tblMachineItems WHERE name = ?;""",
+    "select_all_machine_items":     """SELECT * FROM tblMachineItems;""",
+
+    "insert_machines_catalog": """
+        INSERT INTO tblMachinesCatalog (period, code, description, raw_parent, ID_parent, ID_tblMachinesCatalog_tblMachineItems) 
+        VALUES (?, ?, ?, ?, ?, ?);
+        """,
+
+    "update_machines_catalog_id_parent": """
+        UPDATE tblMachinesCatalog SET raw_parent =?, ID_parent = ? WHERE ID_tblMachinesCatalog = ?;
+        """,
+
+
+    "select_items_machines_catalog": """
+        SELECT tblMachinesCatalog.ID_tblMachinesCatalog 
+        FROM tblMachinesCatalog
+        LEFT JOIN tblMachineItems AS item ON item.ID_tblMachineItem = ID_tblMachinesCatalog_tblMachineItems
+        WHERE item.name = ?;
+        """,
+}
+
+

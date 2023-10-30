@@ -72,7 +72,7 @@ class dbControl:
             output_message(f"ошибка INSERT запроса БД Sqlite3: {' '.join(error.args)}", f"{message}")
         return None
 
-    def run_execute(self, *args, **kwargs) -> int | None:
+    def run_execute(self, *args, **kwargs) -> sqlite3.Cursor | None:
         try:
             result = self.cursor.execute(*args, **kwargs)
             return result

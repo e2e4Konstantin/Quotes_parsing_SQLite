@@ -31,6 +31,7 @@ def read_raw_machines_data(raw_file_db: str, machines_data_file: DataFile):
 
 def read_machines(raw_file_db: str, data: SrcMachinesData):
     """ Читает данные о машинах из файлов. Добавляет столбец 'PERIOD'. Записывает в 'сырую' БД.  """
+    # выделить период из имени файла
     structure_data_file: DataFile = file_extract_period_path(data.path, data.structure)
     ic(structure_data_file)
     read_raw_machines_structure(raw_file_db, structure_data_file)

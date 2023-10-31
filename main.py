@@ -6,9 +6,9 @@ import sqlite3
 from icecream import ic
 
 from data_extraction import read_data_frame, info_data_frame
-from data_storage import (write_raw_catalog_file_to_db, write_raw_quotes_file_to_db,
-                          dbControl, sql_creates,
-                          read_raw_statistics_data_to_db,
+from data_storage import (write_raw_catalog_file_to_db, write_raw_quotes_file_to_db, dbControl,
+                          read_machines,
+                          sql_creates, read_raw_statistics_data_to_db,
                           update_statistics_from_raw_data,
                           create_tables, transfer_raw_quotes,
                           fill_catalog_items, transfer_raw_data_to_catalog, catalog_print)
@@ -58,15 +58,15 @@ def read_raw_data_to_db(db_path: str, db_name):
         db.inform()
 
 
-
-
 if __name__ == "__main__":
     # ic.disable()
 
-    output_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite\output"
-    data_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\АИС"
-    # path = r"C:\Users\kazak.ke\PycharmProjects\development\Quotes_parsing_SQLite"
-    # path = r"C:\Users\kazak.ke\Documents\Задачи\Парсинг_параметризация\SRC"
+    # output_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\Python_projects\development\Quotes_parsing_SQLite\output"
+    output_path = r".\output"
+    output_path = os.path.abspath(output_path)
+
+    # data_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\АИС"
+    data_path = r"C:\Users\kazak.ke\Documents\Задачи\Парсинг_параметризация\SRC"
 
     raw_db_name = r"RawCatalog.sqlite"
     raw_db = os.path.join(output_path, raw_db_name)
@@ -76,12 +76,11 @@ if __name__ == "__main__":
 
     machines_data = SrcMachinesData(data_path, "STRUCTURE_MACHINES_2_68.xlsx", "MACHINES_2_68.xlsx")
     ic(machines_data)
-    # read_machines(raw_db, operating_db, machines_data)
+    read_machines(raw_db, machines_data)
 
     # читаем данные из исходных файлов во raw БД
     # читаем статистику в отдельную таблицу
     # read_raw_data_to_db(path, raw_db)
-
 
     # создаем структуру БД
     # create_tables(operating_db)

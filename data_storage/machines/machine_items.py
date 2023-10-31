@@ -1,5 +1,8 @@
 import re
 from dataclasses import dataclass
+from icecream import ic
+
+from data_storage.re_patterns import clear_code, split_code, remove_wildcard
 
 #
 # _items_eng =    ['chapter', 'subsection', 'group', 'machine']
@@ -25,8 +28,11 @@ _compiled_machine_code_patterns = {
     'wildcard': re.compile(r"[\t\n\r\f\v\s+]+"),
     'code_valid_chars': re.compile(r"[^\d+.-]+"),
 
-    'subsection_prefix': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),    # Раздел 3.
-    'chapter_prefix': re.compile(r"^\s*Глава\s*((\d+)\.)*"),        # Глава 2.
+
+    'chapter_prefix': re.compile(r"^\s*Глава\s*((\d+)\.)*"),  # Глава 2.
+    'subsection_prefix': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),  # Раздел 3.
+    'group_prefix': re.compile(r"^\s*((\d+)\.)*"),  # 3.
+
 }
 
 
@@ -44,95 +50,98 @@ machine_items: dict[str: ItemCatalog] = {
     'directory': ItemCatalog(
         name='справочник', parent_item='справочник', rating=100, pattern=_machine_code_patterns['directory'],
         compiled=_compiled_machine_code_patterns['directory'], prefix=None
-        ),
+    ),
     'chapter': ItemCatalog(
         'глава', 'справочник', 90, _machine_code_patterns['chapter'], _compiled_machine_code_patterns['chapter'],
-        _compiled_machine_code_patterns['chapter_prefix']
-        ),
+        prefix=_compiled_machine_code_patterns['chapter_prefix']
+    ),
     'subsection': ItemCatalog(
         'раздел', 'глава', 80, _machine_code_patterns['subsection'], _compiled_machine_code_patterns['subsection'],
         _compiled_machine_code_patterns['subsection_prefix']
-        ),
+    ),
 
     'group': ItemCatalog(
-        'группа', 'раздел', 70, _machine_code_patterns['group'], _compiled_machine_code_patterns['group'], None
-        ),
+        'группа', 'раздел', 70, _machine_code_patterns['group'], _compiled_machine_code_patterns['group'],
+        _compiled_machine_code_patterns['group_prefix']
+    ),
 
     'machine': ItemCatalog(
         'машина', 'группа', 60, _machine_code_patterns['machine'], _compiled_machine_code_patterns['machine'], None
-        ),
+    ),
 
 }
 
 
-def remove_wildcard(source: str = None) -> str | None:
-    """ Удаляет из строки спецсимволы, одиночные пробелы оставляет """
-    return re.sub(_compiled_machine_code_patterns['wildcard'], r" ", source.strip()) if source else None
+def machines_title_extraction(title: str, item_name: str) -> str | None:
+    """ Удаляет из заголовка префикс, в первом слове делает первую букву заглавной,
+        удаляет лишние пробелы. """
+    title = remove_wildcard(title)
+    if title:
+        prefix_pattern = machine_items[item_name].prefix
+        if prefix_pattern:
+            clean_title = prefix_pattern.sub('', title).strip()
+            by_word = clean_title.split(" ")
+            by_word[0] = by_word[0].strip().capitalize()
+            return " ".join(by_word)
+        else:
+            return title
+    return None
 
 
-def clear_code(source: str = None) -> str | None:
-    """ Удаляет из строки все символы кроме (чисел . -) """
-    return re.sub(_compiled_machine_code_patterns['code_valid_chars'], r"", source)
 
-#
-# def extract_code(source: str, item_name: str) -> str:
-#     """ Выделяет из входной строки шифр объекта в соответствии с названием объекта"""
-#     bid_quote = items_data[item_name].compiled.match(source)
-#     return bid_quote.group(0) if bid_quote else ""
-#
-#
-# def title_extraction(title: str, item_name: str) -> str | None:
-#     """ Удаляет из заголовка префикс, в первом слове делает первую букву заглавной,
-#         удаляет лишние пробелы. """
-#     title = remove_wildcard(title)
-#     if title:
-#         clean_title = items_data[item_name].prefix.sub('', title).strip()
-#         by_word = clean_title.split(" ")
-#         by_word[0] = by_word[0].strip().capitalize()
-#         return " ".join(by_word)
-#     return None
-#
-#
-# def split_code(src_code: str) -> tuple:
-#     """ Разбивает шифр на части. '4.1-2-10' -> ('4', '1', '2', '10')"""
-#     return tuple(re.split('[.-]', src_code)) if src_code else tuple()
-#
-#
-# def split_code_int(src_code: str):
-#     """ Разбивает шифр на части из чисел. '4.1-2-10' -> (4, 1, 2, 10)"""
-#     return tuple(map(int, re.split('[.-]', src_code))) if src_code else tuple()
-#
-#
-# def identify_item(src_code: str) -> tuple:
-#     # ['5',       '5.1',          '5.1-1',    '5.1-1-1',      '5.1-1-1-0-1',  '5.1-1-1']
-#     # ['chapter', 'collection',   'section',  'subsection',   'table',        'quote']
-#     code = remove_wildcard(src_code)
-#     if code:
-#         length = len(split_code(code))
-#         match length:
-#             case 6:  # таблица
-#                 extract = ('table',)
-#             case 4:  # раздел, расценка
-#                 extract = ('subsection', 'quote')
-#             case 3:  # отдел
-#                 extract = ('section',)
-#             case 2:  # сборник
-#                 extract = ('collection',)
-#             case 1:  # глава
-#                 extract = ('chapter',)
-#             case _:  # непонятно
-#                 extract = tuple()
-#         return extract
-#     return tuple()
-#
-#
-# def check_code_item(src_code: str, item_name) -> bool:
-#     """ Проверяет, соответствует ли код указаному типц"""
-#     check_types = identify_item(src_code)
-#     if len(check_types) > 0 and check_types[0] == item_name:
-#         return True
-#     return False
+def identify_item_by_code(src_code: str) -> str:
+    """ По коду определяет тип объекта. """
+    # ['5',     '5.1',      '5.1-1',   '5.1-1-1']
+    # ['глава', 'раздел',   'группа',  'машина']
+    code = clear_code(src_code)
+    if code:
+        match len(split_code(code)):
+            case l if l == 4 and machine_items['machine'].compiled.fullmatch(code):
+                code_type = 'machine'
+            case l if l == 3 and machine_items['group'].compiled.fullmatch(code):
+                code_type = 'group'
+            case l if l == 2 and machine_items['subsection'].compiled.fullmatch(code):
+                code_type = 'subsection'
+            case l if l == 1 and machine_items['chapter'].compiled.fullmatch(code):
+                code_type = 'chapter'
+            case _:  # непонятно
+                code_type = ""
+        return code_type
+    return ""
+
+
+def extract_parent_code(child_code: str) -> str:
+    """ Выделяет из входного шифра родительский шифр.
+        Если это глава, то вернет '0'.
+    """
+    if child_code:
+        stripped_code = split_code(child_code)
+        short_code = stripped_code[:-1]
+        match len(short_code):
+            case 0:
+                return "0"
+            case 1:
+                return stripped_code[0]
+            case code_len:
+                for part in range(code_len - 1, 1, -1):
+                    if int(stripped_code[part]) != 0:
+                        return stripped_code[:part + 1]
+
+    return "0"
+
 
 
 if __name__ == "__main__":
-    print(machine_items)
+    ic(identify_item_by_code('5'))
+    ic(identify_item_by_code('5.1'))
+    ic(identify_item_by_code('5.1-1'))
+    ic(identify_item_by_code('5.1-1-55'))
+    ic(identify_item_by_code('5.1-1-55-88'))
+    ic(identify_item_by_code('5.1-1-5f5'))
+    ic(identify_item_by_code('   5 .1- 1 -5  5'))
+
+    ic(extract_parent_code('5.1-1-55-88'))
+    ic(extract_parent_code('5.1-1-0-88'))
+    ic(extract_parent_code('5.2'))
+    ic(extract_parent_code('5.'))
+    ic(extract_parent_code(''))

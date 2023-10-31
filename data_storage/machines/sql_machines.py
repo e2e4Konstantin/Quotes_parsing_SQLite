@@ -109,6 +109,10 @@ sql_tools_machines = {
 
     "select_name_item_machines":    """SELECT ID_tblMachineItem FROM tblMachineItems WHERE name = ?;""",
     "select_all_machine_items":     """SELECT * FROM tblMachineItems;""",
+    "select_id_parent_item":        """SELECT ID_parent FROM tblMachineItems WHERE ID_tblMachineItem = ?; """,
+
+
+
 
     "insert_machines_catalog": """
         INSERT INTO tblMachinesCatalog (period, code, description, raw_parent, ID_parent, ID_tblMachinesCatalog_tblMachineItems) 
@@ -116,7 +120,7 @@ sql_tools_machines = {
         """,
 
     "update_machines_catalog_id_parent": """
-        UPDATE tblMachinesCatalog SET raw_parent =?, ID_parent = ? WHERE ID_tblMachinesCatalog = ?;
+        UPDATE tblMachinesCatalog SET ID_parent = ? WHERE ID_tblMachinesCatalog = ?;
         """,
 
 
@@ -126,6 +130,15 @@ sql_tools_machines = {
         LEFT JOIN tblMachineItems AS item ON item.ID_tblMachineItem = ID_tblMachinesCatalog_tblMachineItems
         WHERE item.name = ?;
         """,
+    "select_id_by_period_code_machines_catalog": """
+        SELECT ID_tblMachinesCatalog FROM tblMachinesCatalog WHERE period = ? AND code = ?;
+     """,
+
+    "select_code_by_id_machines_catalog": """
+        SELECT code FROM tblMachinesCatalog WHERE ID_tblMachinesCatalog = ?;
+    """,
+
+
 }
 
 

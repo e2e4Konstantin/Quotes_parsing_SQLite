@@ -107,7 +107,10 @@ def title_extraction(title: str, item_name: str) -> str | None:
 
 def split_code(src_code: str) -> tuple:
     """ Разбивает шифр на части. '4.1-2-10' -> ('4', '1', '2', '10')"""
-    return tuple(re.split('[.-]', src_code)) if src_code else tuple()
+    if src_code:
+        return tuple([x for x in re.split('[.-]', src_code) if x])
+    return tuple()
+    # return tuple(re.split('[.-]', src_code)) if src_code else tuple()
 
 
 def split_code_int(src_code: str):

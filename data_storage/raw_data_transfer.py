@@ -163,8 +163,8 @@ def _transfer_raw_items_to_catalog(item_name: str, operating_db_filename: str, r
             log = f"добавлено {len(success)} записей {items_data[item_name].name.capitalize()!r}."
             ic(log)
         else:
-            output_message(f"в сырой БД Sqlite3 не найдено ни одной записи типа: {items_data[item_name].name!r}",
-                           f"{items_data[item_name].pattern}")
+            output_message(f"в сырой БД Sqlite3 не найдено ни одной записи типа:",
+                           f"{items_data[item_name].name!r}, {items_data[item_name].pattern}")
 
 
 def transfer_raw_data_to_catalog(operating_db: str, raw_db: str):

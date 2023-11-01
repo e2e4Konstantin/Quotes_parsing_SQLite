@@ -5,10 +5,13 @@ sql_creates_machines = {
     "table_name_machine_items":     """tblMachineItems""",
 
 
-    # ------ > Имена raw таблиц --------------------------------------------------------------------------
+    # ------ > Имена raw таблиц -------------------------------------------------------------------
     "table_name_raw_machines_catalog":  """tblRawMachinesCatalog""",
     "table_name_raw_machines":          """tblRawMachines""",
-    "select_raw_machines_catalog_code_re": """SELECT * FROM tblRawMachinesCatalog WHERE PRESSMARK REGEXP ?;""",
+
+    # --- > Получение данных ----- ----------------------------------------------------------------
+    "select_raw_machines_catalog_code_re":  """SELECT * FROM tblRawMachinesCatalog WHERE PRESSMARK REGEXP ?;""",
+    "select_all_raw_machines":              """SELECT * FROM tblRawMachines;""",
 
     # --- > Удаление таблиц -----------------------------------------------------------------------
     "delete_table_machines":            """DROP TABLE IF EXISTS tblMachines;""",
@@ -102,6 +105,28 @@ sql_creates_machines = {
         CREATE UNIQUE INDEX IF NOT EXISTS idx_period_code_tblMachines ON tblMachines (period, code);
     """,
 
+    "create_view_machines": """
+        CREATE VIEW IF NOT EXISTS viewMachines AS
+            SELECT m.period AS 'период', m.code AS 'шифр', m.description AS 'содержание', m.measure AS 'ед.изм', m.okp AS 'окп', c.code AS 'родитель', i.name AS 'тип'
+            FROM tblMachines AS m
+            LEFT JOIN tblMachinesCatalog AS c ON c.ID_tblMachinesCatalog = m.FK_tblMachines_tblMachinesCatalog
+            LEFT JOIN tblMachineItems AS i ON i.ID_tblMachineItem = c.ID_tblMachinesCatalog_tblMachineItems
+            ORDER BY m.period, m.code;
+    """,
+
+    "create_view_machines_catalog": """
+        CREATE VIEW IF NOT EXISTS viewMachinesCatalog AS
+            SELECT 
+                c.period, c.code, c.description, i.name, 
+                (SELECT p.name FROM tblMachineItems AS p WHERE p.ID_tblMachineItem = i.ID_parent) AS 'родитель'
+            FROM tblMachinesCatalog AS c
+            LEFT JOIN tblMachineItems AS i ON i.ID_tblMachineItem = c.ID_tblMachinesCatalog_tblMachineItems
+            ORDER BY c.period, c.code;
+    """,
+
+
+
+
 }
 
 # --- > Выборка элементов ---------------------------------------------------------------------
@@ -111,13 +136,15 @@ sql_tools_machines = {
     "select_all_machine_items":     """SELECT * FROM tblMachineItems;""",
     "select_id_parent_item":        """SELECT ID_parent FROM tblMachineItems WHERE ID_tblMachineItem = ?; """,
 
-
-
-
     "insert_machines_catalog": """
         INSERT INTO tblMachinesCatalog (period, code, description, raw_parent, ID_parent, ID_tblMachinesCatalog_tblMachineItems) 
         VALUES (?, ?, ?, ?, ?, ?);
         """,
+
+    "insert_machine": """
+        INSERT INTO tblMachines (period, code, description, measure, okp, okpd2, base_price, wages, electricity, statistics, FK_tblMachines_tblMachinesCatalog) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    """,
 
     "update_machines_catalog_id_parent": """
         UPDATE tblMachinesCatalog SET ID_parent = ? WHERE ID_tblMachinesCatalog = ?;

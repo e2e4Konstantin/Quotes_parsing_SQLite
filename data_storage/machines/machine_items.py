@@ -28,7 +28,6 @@ _compiled_machine_code_patterns = {
     'wildcard': re.compile(r"[\t\n\r\f\v\s+]+"),
     'code_valid_chars': re.compile(r"[^\d+.-]+"),
 
-
     'chapter_prefix': re.compile(r"^\s*Глава\s*((\d+)\.)*"),  # Глава 2.
     'subsection_prefix': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),  # Раздел 3.
     'group_prefix': re.compile(r"^\s*((\d+)\.)*"),  # 3.
@@ -88,7 +87,6 @@ def machines_title_extraction(title: str, item_name: str) -> str | None:
     return None
 
 
-
 def identify_item_by_code(src_code: str) -> str:
     """ По коду определяет тип объекта. """
     # ['5',     '5.1',      '5.1-1',   '5.1-1-1']
@@ -110,6 +108,15 @@ def identify_item_by_code(src_code: str) -> str:
     return ""
 
 
+def code_build(cracked_codee: list[str]) -> str:
+    if cracked_codee:
+        if len(cracked_codee) > 1:
+            return f"{cracked_codee[0]}.{'-'.join(cracked_codee[1:])}"
+        else:
+            return f"{cracked_codee[0]}"
+    return ""
+
+
 def extract_parent_code(child_code: str) -> str:
     """ Выделяет из входного шифра родительский шифр.
         Если это глава, то вернет '0'.
@@ -123,25 +130,27 @@ def extract_parent_code(child_code: str) -> str:
             case 1:
                 return stripped_code[0]
             case code_len:
-                for part in range(code_len - 1, 1, -1):
-                    if int(stripped_code[part]) != 0:
-                        return stripped_code[:part + 1]
-
+                rev = list(reversed(short_code))
+                for i, v in enumerate(rev):
+                    if int(v) != 0:
+                        result = code_build(list(reversed(rev[i:])))
+                        return result
     return "0"
 
 
-
 if __name__ == "__main__":
-    ic(identify_item_by_code('5'))
-    ic(identify_item_by_code('5.1'))
-    ic(identify_item_by_code('5.1-1'))
-    ic(identify_item_by_code('5.1-1-55'))
-    ic(identify_item_by_code('5.1-1-55-88'))
-    ic(identify_item_by_code('5.1-1-5f5'))
-    ic(identify_item_by_code('   5 .1- 1 -5  5'))
-
+    # ic(identify_item_by_code('5'))
+    # ic(identify_item_by_code('5.1'))
+    # ic(identify_item_by_code('5.1-1'))
+    # ic(identify_item_by_code('5.1-1-55'))
+    # ic(identify_item_by_code('5.1-1-55-88'))
+    # ic(identify_item_by_code('5.1-1-5f5'))
+    # ic(identify_item_by_code('   5 .1- 1 -5  5'))
+    #
     ic(extract_parent_code('5.1-1-55-88'))
     ic(extract_parent_code('5.1-1-0-88'))
+    ic(extract_parent_code('7.6-0-0-77'))
+    ic(extract_parent_code('2.1-1'))
     ic(extract_parent_code('5.2'))
     ic(extract_parent_code('5.'))
     ic(extract_parent_code(''))

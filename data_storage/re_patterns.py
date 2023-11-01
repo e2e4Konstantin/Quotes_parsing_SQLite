@@ -28,6 +28,8 @@ _compiled_item_patterns = {
     'subsection_groups': re.compile(r"(^\d+\.\d+-\d+-)(\d+)\s*"),
     'wildcard': re.compile(r"[\t\n\r\f\v\s+]+"),
     'code_valid_chars': re.compile(r"[^\d+.-]+"),
+    'digits': re.compile(r"[^\d+]+"),
+    'digits_dots': re.compile(r"[^\d+.]+"),
 
     'table_prefix': re.compile(r"^\s*Таблица\s*((\d+)\.(\d+)-(\d+)\.)*"),  # Таблица 3.1-4.
     'subsection_prefix': re.compile(r"^\s*Раздел\s*((\d+)\.)*"),  # Раздел 7.
@@ -87,6 +89,22 @@ def clear_code(source: str = None) -> str | None:
     return re.sub(_compiled_item_patterns['code_valid_chars'], r"", source)
 
 
+def keep_just_numbers(source: str = None) -> str | None:
+    """ Удаляет из строки все символы кроме чисел """
+    if source:
+        return re.sub(_compiled_item_patterns['digits'], r"", source)
+    return ""
+
+
+def keep_just_numbers_dots(source: str = None) -> str | None:
+    """ Удаляет из строки все символы кроме чисел и точек"""
+    if source:
+        return re.sub(_compiled_item_patterns['digits_dots'], r"", source)
+    return ""
+
+
+
+
 def extract_code(source: str, item_name: str) -> str:
     """ Выделяет из входной строки шифр объекта в соответствии с названием объекта"""
     bid_quote = items_data[item_name].compiled.match(source)
@@ -142,7 +160,7 @@ def identify_item(src_code: str) -> tuple:
 
 
 def check_code_item(src_code: str, item_name) -> bool:
-    """ Проверяет, соответствует ли код указаному типц"""
+    """ Проверяет, соответствует ли код указанному типу"""
     check_types = identify_item(src_code)
     if len(check_types) > 0 and check_types[0] == item_name:
         return True
@@ -150,7 +168,11 @@ def check_code_item(src_code: str, item_name) -> bool:
 
 
 if __name__ == "__main__":
-    s = '5  . 1-1-1-0-   1   '
+    s = '5  . 1-1 .**-1-0-   1   '
+    print(keep_just_numbers(s))
+
+    print(keep_just_numbers_dots(s))
+
     s2 = remove_wildcard(s)
     print(f"{s2!r}")
     s3 = split_code(s2)

@@ -7,7 +7,7 @@ from icecream import ic
 
 from data_extraction import read_data_frame, info_data_frame
 from data_storage import (write_raw_catalog_file_to_db, write_raw_quotes_file_to_db, dbControl,
-                          read_machines,
+                          read_raw_machines, write_raw_machines_to_operate_db,
                           sql_creates, read_raw_statistics_data_to_db,
                           update_statistics_from_raw_data,
                           create_tables, transfer_raw_quotes,
@@ -65,8 +65,8 @@ if __name__ == "__main__":
     output_path = r".\output"
     output_path = os.path.abspath(output_path)
 
-    # data_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\АИС"
-    data_path = r"C:\Users\kazak.ke\Documents\Задачи\Парсинг_параметризация\SRC"
+    data_path = r"F:\Kazak\GoogleDrive\1_KK\Job_CNAC\АИС"
+    # data_path = r"C:\Users\kazak.ke\Documents\Задачи\Парсинг_параметризация\SRC"
 
     raw_db_name = r"RawCatalog.sqlite"
     raw_db = os.path.join(output_path, raw_db_name)
@@ -76,7 +76,13 @@ if __name__ == "__main__":
 
     machines_data = SrcMachinesData(data_path, "STRUCTURE_MACHINES_2_68.xlsx", "MACHINES_2_68.xlsx")
     ic(machines_data)
-    read_machines(raw_db, machines_data)
+    # читать данные из excel файлов в черновую БД
+    read_raw_machines(raw_db, machines_data)
+    # перенести данные по машинам из черновой БД в рабочую
+    write_raw_machines_to_operate_db(raw_db, operating_db)
+
+
+
 
     # читаем данные из исходных файлов во raw БД
     # читаем статистику в отдельную таблицу

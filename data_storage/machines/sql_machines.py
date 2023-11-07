@@ -135,6 +135,7 @@ sql_tools_machines = {
     "select_name_item_machines":    """SELECT ID_tblMachineItem FROM tblMachineItems WHERE name = ?;""",
     "select_all_machine_items":     """SELECT * FROM tblMachineItems;""",
     "select_id_parent_item":        """SELECT ID_parent FROM tblMachineItems WHERE ID_tblMachineItem = ?; """,
+    "select_machines_all":          """SELECT * FROM tblMachines;""",
 
     "insert_machines_catalog": """
         INSERT INTO tblMachinesCatalog (period, code, description, raw_parent, ID_parent, ID_tblMachinesCatalog_tblMachineItems) 
@@ -165,7 +166,10 @@ sql_tools_machines = {
         SELECT code FROM tblMachinesCatalog WHERE ID_tblMachinesCatalog = ?;
     """,
 
+}
 
+sql_update_machines = {
+    "update_machine_statistics_by_id": """UPDATE tblMachines SET statistics = ? WHERE ID_tblMachine = ?;"""
 }
 
 

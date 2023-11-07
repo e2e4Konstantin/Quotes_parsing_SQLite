@@ -1,3 +1,4 @@
 from data_storage.machines.read_machines import read_raw_machines
 from data_storage.machines.write_machines import write_raw_machines_to_operate_db
+from data_storage.machines.update_machines_statistics import update_machines_statistics_from_raw_db
 

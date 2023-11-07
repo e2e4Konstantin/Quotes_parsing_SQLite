@@ -28,7 +28,6 @@ def write_raw_quotes_file_to_db(db_name: str, data_file: DataFile):
     del quotes_data
 
 
-
 def read_raw_statistics_data_to_db(db_name: str, statistics_file: DataFile):
     """ Читает статистику по расценкам из файла в DF. DF записывает в raw базу данных. """
     # читаем статистику в DataFrame

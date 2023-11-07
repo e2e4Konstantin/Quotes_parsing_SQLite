@@ -6,7 +6,7 @@ DataFile.__annotations__ = {'name': str, 'period': int}
 
 
 SrcData = namedtuple(typename='SrcData', field_names=['catalog', 'quote', 'statistics'], defaults=(None, None, ""))
-SrcData.__annotations__ = {'catalog': list[DataFile], 'quote': list[DataFile], 'statistics': str}
+SrcData.__annotations__ = {'catalog': list[DataFile], 'quote': list[DataFile], 'statistics': DataFile}
 
 
 SrcMachinesData = namedtuple(typename='SrcMachinesData',

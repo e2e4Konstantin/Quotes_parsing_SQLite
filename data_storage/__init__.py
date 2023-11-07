@@ -9,7 +9,12 @@ from data_storage.raw_data_transfer import (transfer_raw_quotes,
                                             update_statistics_from_raw_data, )
 from data_storage.catalog_print import catalog_print
 
-from data_storage.machines import read_raw_machines, write_raw_machines_to_operate_db
+from data_storage.machines import (
+    read_raw_machines,
+    write_raw_machines_to_operate_db,
+    update_machines_statistics_from_raw_db
+)
+
 
 
 

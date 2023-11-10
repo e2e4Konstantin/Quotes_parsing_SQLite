@@ -1,4 +1,10 @@
 # https://duckdb.org/docs/guides/import/excel_import.html
+# https://github.com/duckdb/sqlite_scanner
+# https://www.youtube.com/watch?v=6iyuMJeGhZk
+# https://uwekorn.com/2019/10/19/taking-duckdb-for-a-spin.html
+# https://nuancesprog.ru/p/17357/
+# https://www.cyberforum.ru/blogs/1966431/blog7546.html
+
 
 import duckdb
 from icecream import ic
